@@ -1,0 +1,5 @@
+customer_id,name,account_id,balance,phone,email,open_complaint,vulnerability_flag,segment
+C1001,Amara Okafor,ACC-7781,2450.30,+44 7700 900101,amara.okafor@example.com,true,false,retail
+C1002,Ben Whitfield,ACC-7782,310.00,+44 7700 900102,ben.whitfield@example.com,false,true,retail
+C1003,Chloe Martin,ACC-7783,15980.75,+44 7700 900103,chloe.martin@example.com,false,false,premier
+C1004,Daniel Reyes,ACC-7784,-120.40,+44 7700 900104,daniel.reyes@example.com,false,false,retail

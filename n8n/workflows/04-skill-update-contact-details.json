@@ -1,0 +1,238 @@
+{
+  "id": "CncSkillContact1",
+  "name": "Concierge skill: Update contact details",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "field",
+              "type": "string"
+            },
+            {
+              "name": "new_value",
+              "type": "string"
+            },
+            {
+              "name": "session_customer_id",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "5e03bcb2-ad4e-4637-a50d-520f46dc98be",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const SKILL = 'update_contact_details';\nconst RISK = 'medium';\nconst CUSTOMERS = [\n  {\n    \"customer_id\": \"C1001\",\n    \"name\": \"Amara Okafor\",\n    \"account_id\": \"ACC-7781\",\n    \"balance\": 2450.3,\n    \"phone\": \"+44 7700 900101\",\n    \"email\": \"amara.okafor@example.com\",\n    \"open_complaint\": true,\n    \"vulnerability_flag\": false,\n    \"segment\": \"retail\"\n  },\n  {\n    \"customer_id\": \"C1002\",\n    \"name\": \"Ben Whitfield\",\n    \"account_id\": \"ACC-7782\",\n    \"balance\": 310.0,\n    \"phone\": \"+44 7700 900102\",\n    \"email\": \"ben.whitfield@example.com\",\n    \"open_complaint\": false,\n    \"vulnerability_flag\": true,\n    \"segment\": \"retail\"\n  },\n  {\n    \"customer_id\": \"C1003\",\n    \"name\": \"Chloe Martin\",\n    \"account_id\": \"ACC-7783\",\n    \"balance\": 15980.75,\n    \"phone\": \"+44 7700 900103\",\n    \"email\": \"chloe.martin@example.com\",\n    \"open_complaint\": false,\n    \"vulnerability_flag\": false,\n    \"segment\": \"premier\"\n  },\n  {\n    \"customer_id\": \"C1004\",\n    \"name\": \"Daniel Reyes\",\n    \"account_id\": \"ACC-7784\",\n    \"balance\": -120.4,\n    \"phone\": \"+44 7700 900104\",\n    \"email\": \"daniel.reyes@example.com\",\n    \"open_complaint\": false,\n    \"vulnerability_flag\": false,\n    \"segment\": \"retail\"\n  }\n];\n\nconst input = $input.first().json;\nconst session = CUSTOMERS.find(c => c.customer_id === input.session_customer_id) || null;\nconst owner = CUSTOMERS.find(c => c.account_id === input.account_id) || null;\nfunction refuse(reason) {\n  return [{ json: { ...input, authorised: false, needs_approval: false, reason, risk: RISK, skill: SKILL } }];\n}\nif (!session) return refuse('No identified customer in this session. Identification happens before any account action.');\n\nif (input.account_id && (!owner || owner.customer_id !== session.customer_id)) {\n  return refuse('The account does not belong to the identified customer.');\n}\nconst needs_approval = (false);\nreturn [{ json: { ...input, authorised: true, needs_approval, reason: needs_approval ? 'Policy requires a named decision owner to approve before this runs.' : 'Within policy for this customer.', risk: RISK, skill: SKILL, customer: session } }];\n"
+      },
+      "id": "88f589d1-39d1-4895-9a20-34a8ff1dc0de",
+      "name": "Check authorisation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1ecdcae2-6817-4d44-9f2c-4fce0524311a",
+              "leftValue": "={{ $json.authorised }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4e3dcabd-11f0-4b12-9ad0-634adcd4d608",
+      "name": "Authorised?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2c18110f-0939-45a9-81be-8d9dd98a8cf5",
+              "name": "skill",
+              "value": "update_contact_details",
+              "type": "string"
+            },
+            {
+              "id": "51bfcb80-1ca3-42a5-b97a-0d7f4941d274",
+              "name": "risk",
+              "value": "={{ $json.risk }}",
+              "type": "string"
+            },
+            {
+              "id": "14a89a59-57e7-41a4-b727-bac365d5b7fa",
+              "name": "status",
+              "value": "refused",
+              "type": "string"
+            },
+            {
+              "id": "62d96b33-1a8f-455e-9157-489dc8ca6b81",
+              "name": "result",
+              "value": "={{ 'Refused: ' + $json.reason }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "8cd18802-9903-4ae5-b547-4cd83b0d3c76",
+      "name": "Refused",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        720,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst allowed = ['phone', 'email'];\nif (!allowed.includes(j.field)) {\n  return [{ json: { ...j, status: 'refused', result: `Refused: only ${allowed.join(' or ')} can be changed here. Address changes need proof of address at the counter.` } }];\n}\nreturn [{ json: { ...j, status: 'done', result: `Updated ${j.field} for ${j.customer.name} to ${j.new_value}. Previous value ${j.customer[j.field]} retained for 30 days so the change can be reversed.` } }];\n"
+      },
+      "id": "24b887aa-4177-4e9f-bd34-a2a01f5b0d24",
+      "name": "Do the work",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "651ccffc-5751-441a-b162-6de3d799f146",
+              "name": "skill",
+              "value": "update_contact_details",
+              "type": "string"
+            },
+            {
+              "id": "12e19067-fbbb-4c1f-9fa4-6122360d85af",
+              "name": "risk",
+              "value": "={{ $json.risk }}",
+              "type": "string"
+            },
+            {
+              "id": "06126b5d-1bc5-47f3-98fd-a4afd967e092",
+              "name": "status",
+              "value": "={{ $json.status || 'done' }}",
+              "type": "string"
+            },
+            {
+              "id": "964f557d-5126-4437-9550-6941742b13ab",
+              "name": "result",
+              "value": "={{ $json.result }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "e8e34a56-bf1e-4f37-b8c0-ada999e43786",
+      "name": "Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1200,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Check authorisation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check authorisation": {
+      "main": [
+        [
+          {
+            "node": "Authorised?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorised?": {
+      "main": [
+        [
+          {
+            "node": "Do the work",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Refused",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Do the work": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
