@@ -1,1 +1,11 @@
 .DS_Store
+
+# Python / LangGraph build: secrets, environments and local run data
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.langgraph_api/
+*.sqlite
+*.sqlite3
+*.db
