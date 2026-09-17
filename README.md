@@ -8,8 +8,9 @@ automated decision-making has to stop in a regulated industry.
 The design is a sandwich, not a dial: deterministic process orchestration on
 the outside, bounded and risk-rated skills on the inside and the agent free
 in between. Two deterministic gates guard it. Pre-action authorisation runs
-on every skill call. An impact and policy gate on the agent's output routes
-anything the law or policy names to a named decision owner.
+on every skill call. An impact and policy gate on the agent's output sends
+flagged customers, medium-risk actions and requests that match its policy
+keywords to a named decision owner.
 
 | Folder | Status |
 | --- | --- |

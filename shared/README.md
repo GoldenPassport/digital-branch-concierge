@@ -14,6 +14,15 @@ for drama.
 | `evaluations/test-conversations.csv` | Version 1 of the twelve test conversations, with the expected route and skill. The n8n build was run and scored against this file. |
 | `evaluations/test-conversations-v2.csv` | Version 2, used by the LangGraph build. |
 
+## How the builds read it
+
+The LangGraph build reads these files at run time. The n8n workflows carry
+copies: the customers are embedded in the Identify customer and Check
+authorisation nodes, the test messages in Identify customer and the
+knowledge in the knowledge tool. Editing a file here does not update those
+copies, so change both, then run `node --test n8n/tests/code-nodes.test.mjs` to check the
+customers and test messages still match.
+
 ## The two versions of the test set
 
 Version 2 changes only the expected skill for two conversations, after a

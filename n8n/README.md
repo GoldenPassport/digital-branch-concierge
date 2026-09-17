@@ -51,9 +51,15 @@ Every reply ─> Evaluating? ─> Record metrics (evaluation runs only)
 
 - **Identify customer** stands in for the photo ID check at the counter.
   Identification is the process's job, not the agent's. The default customer
-  is C1003; tag a chat message with `[customer:C1001]` to switch.
+  is C1003; tag the first chat message with `[customer:C1001]` to choose
+  another. The customer is then bound to the chat session, so a follow-up
+  cannot switch customer, and an unknown id is not identified. The binding
+  uses workflow static data, which n8n saves only for production executions
+  (a published workflow's chat), so in the editor's Open chat repeat the tag
+  on follow-ups.
 - **Guardrails in** runs the jailbreak and topical-alignment checks before
-  the model sees the message. Fail goes to a fixed refusal and never reaches
+  the concierge agent sees the message. The checks use their own guardrail
+  model. Fail goes to a fixed refusal and never reaches
   the agent.
 - **AI Agent** holds the conversation, with DeepSeek (`deepseek-flash`) as
   the model, at most eight iterations and intermediate steps returned for the
@@ -65,10 +71,12 @@ Every reply ─> Evaluating? ─> Record metrics (evaluation runs only)
 - **Simple Memory** is keyed by the identified customer and the chat session,
   so one customer's context never carries into the next customer's
   conversation.
-- **Skills** are sub-workflows. The first node after the trigger checks that
-  the account belongs to the identified customer, using a
-  `session_customer_id` the process fills in from Identify customer. The model
-  cannot invent it.
+- **Skills** are sub-workflows. The first node after the trigger validates
+  the inputs (a required account id, a statement period of 1 to 24 months, a
+  valid phone number or email, an appointment type) and checks that the
+  account belongs to the identified customer, using a `session_customer_id`
+  the process fills in from Identify customer. The model cannot invent it.
+  The actions are simulated: nothing is stored.
 - **Pre-action approval (Slack)** is n8n's human review step (Tools panel,
   Human review, Slack; n8n 2.6 and later). It sits between the agent and the
   writing skill: the agent proposes the call, a decision owner sees the tool
@@ -77,8 +85,13 @@ Every reply ─> Evaluating? ─> Record metrics (evaluation runs only)
 - **Guardrails out** masks card numbers, IBANs, bank account numbers and
   secret keys in the reply.
 - **Assemble facts** is a Code node with no model in it. It builds what the
-  gate reads: the highest risk any skill returned, the customer's flags and
-  policy keywords in the request, with the reasons in plain words.
+  gate reads, with the reasons in plain words: the highest risk of any tool
+  called, taken from a registry in the node rather than from the tool's
+  result; a tool result it cannot read; an unidentified customer or a
+  conflicting customer tag; the customer's flags; policy keywords in the
+  request, or earlier in the session; and a reply that is empty or claims an
+  outcome such as an account closed. Only the sanitised reply is used, so an
+  empty sanitised reply goes to a person rather than restoring the original.
 - **Impact and policy gate** is a Switch node. Only an explicit
   `straight_through` classification goes to the customer. The fallback output
   is Review, so a missing or unrecognised classification goes to a person.
@@ -186,7 +199,20 @@ or the tool call fails with "Workflow is not active and cannot be executed".
 The main process must be published too, because the Slack buttons call back
 to a webhook that only answers for a published workflow.
 
-### 7. Try it
+### 7. Check the Code nodes locally
+
+```bash
+node --test n8n/tests/code-nodes.test.mjs
+```
+
+Runs the JavaScript inside the Code nodes with stand-ins for n8n's
+`$input`, `$()`, `$execution` and static data, from the repository root. It
+checks identity binding, the facts the gate reads, the skills' input
+validation, and that the customers and test messages embedded in the
+workflows match `../shared`. It does not run n8n, the model, Slack or the
+Guardrails nodes.
+
+### 8. Try it
 
 Open Concierge: main process, click Open chat and send the test
 conversations below one at a time. For the evaluation, open the Evaluations
@@ -239,7 +265,9 @@ short version:
   needs n8n Cloud Pro or Enterprise, or self-hosted Enterprise or registered
   Community; on other plans, filter by status and time.
 - **Containment.** The jailbreak stopped at the input guardrail. The skill's
-  ownership check refused a foreign account when called directly.
+  ownership check refused a foreign account when called directly. These are
+  single-turn results; see Changes after review for the multi-turn gaps
+  found later.
 - **Never decide.** The complaint, closure, overdraft and vulnerable
   customer's contact change all went to a person. Routine requests did not.
 - **Drift.** The third evaluation run scored `route_correct` 1.00 on the
@@ -260,6 +288,27 @@ Four lessons surfaced only because the test conversations ran:
 4. My evaluation sessions reused ids, so one run answered from the previous
    run's memory. They now include the execution id.
 
+## Changes after review
+
+A code review after the recorded runs found gaps the evaluation did not
+cover. They are fixed in the workflow files and covered by the local tests
+above, but these changes have not been run in n8n; the evidence on the demo
+page comes from the workflows as they were.
+
+- A follow-up message could fall back to the default customer, losing the
+  first customer's flags. The customer is now bound to the session, and an
+  unknown id is not identified.
+- An unreadable result from a skill counted as no risk. Risk now comes from a
+  registry, and an unreadable result goes to review.
+- The gate read only the latest message, so "Yes please" after a closure
+  request could go straight through. A policy request now carries through
+  the session, and a reply claiming an outcome goes to a person.
+- An empty sanitised reply fell back to the unsanitised output. It now goes
+  to a person.
+- A blank account id skipped the ownership check, and empty or invalid
+  contact values and out-of-range statement periods were accepted. Inputs are
+  now validated first.
+
 ## Known limits
 
 - Identification is simulated by a tag in the message.
@@ -279,3 +328,12 @@ Four lessons surfaced only because the test conversations ran:
   Client Tool pointed at a read-only server.
 - The pre-action approval does not capture who responded until the fix for
   n8n issue 37692 ships.
+- The human review step runs before the skill, so a contact change with an
+  invalid value can still reach the reviewer; the skill then refuses it.
+- The session binding and the remembered policy request use workflow static
+  data, which n8n saves only for production executions.
+- The customers, test messages and knowledge are copied into the workflows.
+  Editing `../shared` does not update them; the local tests check the
+  customers and test messages still match.
+- The evaluation scores routes only. It does not check which skill ran,
+  that an approval fired or how a multi-turn conversation behaves.
