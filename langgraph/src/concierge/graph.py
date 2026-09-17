@@ -6,8 +6,10 @@
                                                                 ^                   |
                                                                 +-- record_decision <+
 
-Everything except the `agent` node is deterministic. The agent is a LangChain
-`create_agent` subgraph with the pre-action gate as middleware (agent.py).
+The routing, authorisation and gate rules are deterministic Python. The
+input guardrail adds a model classifier after its fixed patterns, and the
+agent is a LangChain `create_agent` subgraph with the pre-action gate as
+middleware (agent.py).
 """
 
 from uuid import uuid4
@@ -55,6 +57,7 @@ def identify(state: ConciergeState, runtime: Runtime[Context]) -> dict:
         "reasons": [],
         "decision": {},
         "draft_reply": "",
+        "guard_out": [],
         "reply": "",
         "outcome": "",
     }
@@ -83,8 +86,21 @@ def assemble_facts(state: ConciergeState) -> dict:
     turn = state["messages"][state["turn_start"] :]
     runs, max_risk = facts.skills_run(turn)
     customer = data.customer(state["session"]["customer_id"])
-    why = facts.reasons(customer, state["request"], max_risk, state.get("draft_reply", ""))
-    return {"skills_run": runs, "max_risk": max_risk, "reasons": why, "route": classify(True, why)}
+    why = facts.reasons(
+        customer,
+        state["request"],
+        max_risk,
+        state.get("draft_reply", ""),
+        runs=runs,
+        policy_earlier=state.get("policy_seen", False),
+    )
+    return {
+        "skills_run": runs,
+        "max_risk": max_risk,
+        "reasons": why,
+        "route": classify(True, why),
+        "policy_seen": state.get("policy_seen", False) or facts.POLICY_REASON in why,
+    }
 
 
 def after_gate(state: ConciergeState) -> str:
@@ -128,7 +144,16 @@ def release(state: ConciergeState) -> dict:
         reply, outcome = d.get("edited_reply") or state["draft_reply"], "review_approved"
     else:
         reply, outcome = HELD_REPLY, "review_held"
-    return {"reply": reply, "outcome": outcome, "messages": [AIMessage(content=reply, name="concierge")]}
+    # Mask whatever is finally sent, including a decision owner's edited reply.
+    reply, removed = sanitise(reply)
+    request, _ = sanitise(state["request"])
+    return {
+        "reply": reply,
+        "outcome": outcome,
+        "guard_out": sorted({*state.get("guard_out", []), *removed}),
+        "messages": [AIMessage(content=reply, name="concierge")],
+        "transcript": [{"role": "customer", "content": request}, {"role": "concierge", "content": reply}],
+    }
 
 
 def build_graph(model, classifier: Classifier | None = None, checkpointer=None):

@@ -9,6 +9,7 @@ asks for a detail before writing.
 
 import csv
 import time
+from uuid import uuid4
 from dataclasses import dataclass, field
 
 from langgraph.types import Command
@@ -38,7 +39,9 @@ class Result:
 def run_case(graph, case: dict, *, hold: bool = False, approver: str = "Scripted decision owner", session: str = "local") -> Result:
     tid = case["test_id"]
     context = Context(customer_id=case["customer_id"], session_id=f"{session}-{tid}", test_id=tid)
-    config = {"configurable": {"thread_id": f"{case['customer_id']}:{session}-{tid}"}}
+    # A fresh thread per run, so repeating a case never reuses an earlier
+    # conversation. The follow-up and every resume stay on this thread.
+    config = {"configurable": {"thread_id": f"{case['customer_id']}:{session}-{tid}:{uuid4().hex[:8]}"}}
     result = Result(state={})
     started = time.perf_counter()
 

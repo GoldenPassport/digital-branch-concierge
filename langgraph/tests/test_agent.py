@@ -44,7 +44,7 @@ def test_contact_change_pauses_for_owner_then_runs_on_approve():
     assert pause.value["action_requests"][0]["name"] == "update_contact_details"
     resumed = agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), config, context=CHLOE)
     [result] = tool_results(resumed)
-    assert result["status"] == "done" and "Previous value +44 7700 900103" in result["result"]
+    assert result["status"] == "done" and "previous value, +44 7700 900103" in result["result"]
 
 
 def test_contact_change_rejected_by_owner_does_not_run():

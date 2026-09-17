@@ -37,3 +37,24 @@ def test_guard_out_masks_card_numbers():
     text, found = sanitise("Your card 4111 1111 1111 1111 is active.")
     assert "4111" not in text and found == ["card number"]
     assert sanitise("Your balance is £15,980.75.")[1] == []
+
+
+def test_tool_results_are_read_safely():
+    from langchain_core.messages import ToolMessage
+
+    from concierge.gates.facts import skills_run
+
+    runs, max_risk = skills_run(
+        [
+            ToolMessage(content="[]", name="fetch_balance", tool_call_id="a"),
+            ToolMessage(content="not json", name="print_statement", tool_call_id="b"),
+            ToolMessage(content='{"status": "done", "risk": "none"}', name="update_contact_details", tool_call_id="c"),
+            ToolMessage(content="Saturday: 09:00 to 13:00.", name="opening_hours", tool_call_id="d"),
+            ToolMessage(content="?", name="wire_money", tool_call_id="e"),
+        ]
+    )
+    assert [r["status"] for r in runs] == ["unrecognised", "unrecognised", "done", "done", "unrecognised"]
+    # Risk comes from the registry, never from the result, and an unknown tool is high.
+    assert runs[2]["risk"] == "medium" and runs[4]["risk"] == "high" and max_risk == "high"
+    chloe = data.customer("C1003")
+    assert "unrecognised tool result" in reasons(chloe, "Hi", max_risk, "Ok", runs=runs)

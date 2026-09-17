@@ -5,18 +5,15 @@ resuming any pauses, so the run appears in LangSmith Studio and in traces.
 """
 
 import asyncio
-import csv
 import sys
 
 from langgraph_sdk import get_client
 
-from concierge import data
-
-FOLLOW_UPS = {"T06": "Yes, that's right, please go ahead.", "T10": "ben.whitfield.new@example.com please."}
+from concierge.conversations import FOLLOW_UPS, cases
 
 
 async def main(test_id: str, hold: bool, approver: str) -> None:
-    case = next(r for r in csv.DictReader(open(data.TEST_CONVERSATIONS)) if r["test_id"] == test_id)
+    case = next(r for r in cases() if r["test_id"] == test_id)
     client = get_client(url="http://127.0.0.1:2024")
     thread = await client.threads.create(metadata={"test_id": test_id})
     ctx = {"customer_id": case["customer_id"], "session_id": f"server-{test_id}", "test_id": test_id}

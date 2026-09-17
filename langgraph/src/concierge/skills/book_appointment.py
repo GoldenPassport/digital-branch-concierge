@@ -1,3 +1,8 @@
+"""Book an appointment: a low-risk, reversible action.
+
+Simulated for the demo: it returns a reference but does not store a booking.
+"""
+
 from uuid import uuid4
 
 from langchain.tools import ToolRuntime, tool
@@ -19,6 +24,7 @@ class BookAppointmentInput(BaseModel):
 @tool(NAME, args_schema=BookAppointmentInput)
 def book_appointment(appointment_type: str, preferred_time: str | None, runtime: ToolRuntime[Context]) -> str:
     """Book a 45-minute branch appointment. Risk: low, reversible.
+    Demo build: the booking is simulated and nothing is stored.
     Returns a confirmation with a reference, or a refusal."""
     auth = authorise(NAME, customer_id(runtime))
     if not auth.authorised:
@@ -27,6 +33,6 @@ def book_appointment(appointment_type: str, preferred_time: str | None, runtime:
     return done(
         NAME,
         auth.risk,
-        f"Booked: {appointment_type} appointment, {when}, 45 minutes. Reference APT-{uuid4().hex[:6].upper()}. "
-        "The customer can cancel or move it at any time.",
+        f"Booked: {appointment_type} appointment, {when}, 45 minutes. Reference APT-{uuid4().hex[:6].upper()} "
+        "(demo: simulated, nothing stored). The customer can cancel or move it at any time.",
     )

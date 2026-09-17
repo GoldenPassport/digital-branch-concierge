@@ -37,7 +37,7 @@ def masking_rules() -> list[dict]:
         {"pattern": re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"), "replace": "[email]"},
         {"pattern": re.compile(r"\+44\s?\d{4}\s?\d{6}|\b07\d{3}\s?\d{6}\b"), "replace": "[phone]"},
         {"pattern": re.compile(r"\bACC-\d{4}\b"), "replace": "[account]"},
-        {"pattern": re.compile(r"\b(?:\d[ -]?){13,19}\b"), "replace": "[card]"},
+        {"pattern": re.compile(r"\b\d(?:[ -]?\d){12,18}\b"), "replace": "[card]"},
     ]
     if names:
         rules.append({"pattern": re.compile("|".join(re.escape(n) for n in names)), "replace": "[customer name]"})

@@ -6,9 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "langchain>=1.4,<2",
     "langchain-deepseek>=1.1",
-    "langchain-openai>=1",
     "langgraph>=1.2,<2",
-    "langgraph-checkpoint-sqlite>=3.1",
     "langsmith>=0.12.6",
     "python-dateutil>=2.9.0.post0",
     "python-dotenv>=1.2.3",
@@ -20,7 +18,6 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "agentevals>=0.0.9",
     "langgraph-cli[inmem]>=0.4.31",
     "pytest>=9.1.1",
 ]

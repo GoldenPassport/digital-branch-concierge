@@ -2,8 +2,8 @@
 
     uv run python scripts/setup_review_queue.py
 
-A LangSmith rule (set up in the UI) sends traces whose route feedback is
-`review` or `refused` into this queue. A reviewer scores each case against the
+Two LangSmith rules (set up in the UI) send traces whose output `outcome`
+contains `review_held` or `refused` into this queue. A reviewer scores each case against the
 rubric and writes any improvement as a proposal. Proposals change nothing on
 their own: a corrected case is added to the `concierge-12` dataset, and a
 change to a skill, tool, knowledge or the prompt is only promoted after its

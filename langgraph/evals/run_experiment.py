@@ -42,7 +42,7 @@ def target(inputs: dict) -> dict:
         "route": s["route"],
         "outcome": s["outcome"],
         "reply": s["reply"],
-        "skills_run": [t["tool"] for t in s.get("skills_run", []) if t["status"] != "refused"],
+        "skills_run": [t["tool"] for t in s.get("skills_run", []) if t["status"] == "done"],
         "pauses": r.pauses,
         "turns": r.turns,
     }
