@@ -1,6 +1,6 @@
 Add the impact and policy gate: a deterministic check that runs in CallBranchConcierge AFTER AgentFlow returns and decides whether the reply can go straight to the customer. No model call in the gate. No SQL nodes, no screens, no timers. Keep the agent's call condition TotalCallsCount >= 6.
 
-1) Record the turn start time at the beginning of CallBranchConcierge. After AgentFlow, read the DecisionLog rows for this SessionId created since the turn start: these are the skills and tools the agent called this turn. MaxRisk = the highest Risk among them (low < medium < high; a capability not in the Capability entity counts as high).
+1) Record the turn start time at the beginning of CallBranchConcierge. After AgentFlow, read the DecisionLog rows for this SessionId created since the turn start: these are the skills and tools the agent called this turn. MaxRisk = the highest Risk among them (low < medium < high; a capability not in the Capability entity counts as high). If the agent called nothing this turn, MaxRisk = "none": no skill ran, so there is no skill risk.
 
 2) Server action ImpactPolicyGate(SessionId, UserMessage, Reply, MaxRisk) returns Route (Text: straight_through or review) and Reasons (Text, semicolon separated). Add a reason for each of these, in this order:
 - MaxRisk is medium or high: "skill risk <MaxRisk>"
