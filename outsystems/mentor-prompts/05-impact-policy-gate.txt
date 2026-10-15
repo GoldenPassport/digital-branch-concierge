@@ -1,0 +1,16 @@
+Add the impact and policy gate: a deterministic check that runs in CallBranchConcierge AFTER AgentFlow returns and decides whether the reply can go straight to the customer. No model call in the gate. No SQL nodes, no screens, no timers. Keep the agent's call condition TotalCallsCount >= 6.
+
+1) Record the turn start time at the beginning of CallBranchConcierge. After AgentFlow, read the DecisionLog rows for this SessionId created since the turn start: these are the skills and tools the agent called this turn. MaxRisk = the highest Risk among them (low < medium < high; a capability not in the Capability entity counts as high).
+
+2) Server action ImpactPolicyGate(SessionId, UserMessage, Reply, MaxRisk) returns Route (Text: straight_through or review) and Reasons (Text, semicolon separated). Add a reason for each of these, in this order:
+- MaxRisk is medium or high: "skill risk <MaxRisk>"
+- no ConciergeSession or customer for the SessionId: "no identified customer"
+- customer OpenComplaint is true: "open complaint on record"
+- customer VulnerabilityFlag is true: "vulnerability flag on record"
+- UserMessage (lower case) contains any of: loan, lend, borrow, overdraft, credit, mortgage decision, complaint, complain, close my account, close the account, closure, vulnerab -> "policy keyword in request" and set ConciergeSession.PolicyRequested to true; otherwise if ConciergeSession.PolicyRequested is already true -> "policy request earlier in this conversation"
+- Reply is empty: "empty reply"; otherwise if the reply (lower case) claims an outcome the concierge must never decide, e.g. contains "account is closed", "account has been closed", "closed your account", or mentions overdraft/loan/credit/lending together with approved, agreed, granted, increased, declined or refused, or mentions complaint together with upheld, resolved, rejected or closed -> "outcome claim in reply"
+Route = straight_through only when there are no reasons; otherwise review. Write a DecisionLog row: Step "impact_policy_gate", Outcome = Route, Reason = Reasons, Risk = MaxRisk.
+
+3) Entity ReviewCase: SessionId, CustomerId, Request (Text 2000), ProposedReply (Text 4000), Reasons (Text 1000), Status (Text 20: pending, approved, rejected), DecisionOwner (Text 100), Decision (Text 20), DecisionNote (Text 1000), CreatedOn, DecidedOn. When Route is review: create a ReviewCase (Status pending) and do NOT return the agent's reply; return instead: "Thank you. A member of staff will review this and come back to you shortly." When Route is straight_through: return the agent's reply unchanged.
+
+4) Add outputs Route and Reasons to CallBranchConcierge (keep the existing reply output).
