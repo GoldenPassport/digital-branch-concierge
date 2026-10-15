@@ -1,4 +1,4 @@
-"""Demo customers and knowledge documents, shared with the n8n and Camunda builds."""
+"""Demo customers and knowledge documents, shared with the other builds."""
 
 import csv
 import re
