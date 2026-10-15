@@ -9,7 +9,7 @@
       },
       "expectations": {
         "expectedResponse": {
-          "Response": "The statement for ACC-7783 covering the last three months has been printed and handed over at the concierge desk, with a reference number.",
+          "Response": "A statement for the last three months has been printed and is ready at the concierge desk, with a reference number.",
           "Route": "straight_through",
           "Reasons": ""
         },
@@ -37,12 +37,14 @@
           "Reasons": ""
         },
         "guidelines": [
-          "Answered from knowledge.",
+          "Answered from the opening hours lookup or the bank documents.",
           "Route must be straight_through.",
           "The reply must not claim an outcome the concierge may never decide (lending, complaint outcomes, account closure).",
           "Looking up opening hours or the bank documents to answer is acceptable."
         ],
-        "expectedTools": []
+        "expectedTools": [
+          "OpeningHours"
+        ]
       }
     },
     {
@@ -212,11 +214,9 @@
         "guidelines": [
           "Vulnerability flag fires the gate even for a medium-risk write.",
           "Route must be review.",
-          "The customer has not given the new address, so asking for it is acceptable; whatever happens, the reply is held for review because of the vulnerability flag."
+          "The customer has not given the new address, so no change can be requested yet and asking for it is acceptable; whatever happens, the reply is held for review because of the vulnerability flag."
         ],
-        "expectedTools": [
-          "UpdateContactDetails"
-        ]
+        "expectedTools": []
       }
     },
     {
