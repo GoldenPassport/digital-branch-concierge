@@ -1,0 +1,17 @@
+Add the decision owner step for review cases. A person with the DecisionOwner role decides each review case, and a workflow in the Portal will wait for that decision. Do not change the agent, its actions, the system prompt or the impact and policy gate. No SQL nodes, no timers, keep TotalCallsCount >= 6.
+
+1) Add an app role DecisionOwner.
+
+2) Add two public events: ReviewRequested with input ReviewCaseId (ReviewCase Identifier), and ReviewDecided with input ReviewCaseId (ReviewCase Identifier). In CallBranchConcierge, right after the ReviewCase is created, trigger ReviewRequested with the new case's Id.
+
+3) Public service action ListReviewCases(Status Text, default "pending") returns the review cases with that Status, newest first, each with: Id, CreatedOn, CustomerId, the customer's Name, Request, ProposedReply, Reasons, Status, Decision, DecisionOwner, DecisionNote, DecidedOn.
+
+4) Public service action GetReviewCaseSummary(ReviewCaseId) returns the same fields for one case (not GetReviewCase, which is the entity's own action).
+
+5) Public service action RecordReviewDecision(ReviewCaseId, Approved Boolean, Note Text) returns Success (Boolean) and Message (Text). Rules, in order:
+- the current user must have the DecisionOwner role, otherwise Success false and Message "Only a decision owner can decide review cases."
+- the case must exist and have Status pending, otherwise Success false and Message "This case has already been decided."
+- set Status and Decision to "approved" or "rejected", DecisionOwner to the current user's name, DecisionNote to Note and DecidedOn to now.
+- if the case's customer has a ContactChangeRequest with Status pending: when approved, update that customer's Phone or Email (by Field) to NewValue and set the request to approved; when rejected, set the request to rejected.
+- write a DecisionLog row: CorrelationId = the case's SessionId, CustomerId, Step "decision_owner", Outcome = the decision, Reason = "<decision owner>: <Note>".
+- trigger ReviewDecided with the ReviewCaseId, then return Success true and Message "Decision recorded."

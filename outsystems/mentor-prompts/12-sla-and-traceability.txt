@@ -1,0 +1,21 @@
+PART A - send in Branch Concierge Demo (the agentic app), after prompt 11. Do not change the agent, the system prompt, the gate's rules, the guardrail or CallBranchConcierge.
+
+SLAs on human review, in working hours: 09:00 to 17:00, Monday to Friday, UK time (Europe/London, so BST in summer and GMT in winter). Approval cases (Kind approval) must be decided within 4 working hours; review cases (Kind review) within 8 working hours (one working day). No bank holiday calendar for now.
+
+1) Server action CalculateSlaDueOn(StartUtc DateTime, WorkingHours Integer) returns DueOnUtc (DateTime). Convert StartUtc to UK time, move it to the next working time if it falls outside 09:00-17:00 Mon-Fri, add WorkingHours of working time (skipping evenings and weekends), convert back to UTC. Write it with clear unit-testable logic and add a public service action TestSlaDueOn with the same signature so it can be checked.
+
+2) ReviewCase: add SlaWorkingHours (Integer), SlaDueOn (DateTime, UTC), EscalatedOn (DateTime) and ProcessInstanceId (Text 50). When RunImpactPolicyGate creates a ReviewCase, set SlaWorkingHours from its Kind and SlaDueOn = CalculateSlaDueOn(CreatedOn, SlaWorkingHours). Return SlaDueOn as an extra output of RunImpactPolicyGate.
+
+3) Public service action SecondsUntil(DueOnUtc DateTime) returns Seconds (Integer, minimum 60), for the workflow's timeout expression.
+
+4) Public service action EscalateReviewCase(ReviewCaseId) sets EscalatedOn, writes a DecisionLog row with Step "sla_breach", Outcome "escalated", Reason "not decided within <SlaWorkingHours> working hours", and triggers a new public event ReviewEscalated(ReviewCaseId).
+
+5) Traceability: add an optional input ProcessInstanceId (Text) to RunAgent and RunImpactPolicyGate. Store it on ConciergeSession (latest instance) and on the ReviewCase, and use it as the DecisionLog CorrelationId suffix so one chat request, one process instance, one agent run and one review case can be traced to each other.
+
+6) ListReviewCases and GetReviewCaseSummary: also return SlaWorkingHours, SlaDueOn, EscalatedOn and ProcessInstanceId.
+
+PART B - send in Branch Concierge Demo test app (add the new public elements first).
+
+1) ReviewCases pending table, first three columns: "Created" (CreatedOn in UK time), "SLA" (e.g. "4 working hours"), "Action before" (SlaDueOn in UK time, e.g. "Fri 16 Oct 17:00"), shown green when more than 1 working hour is left, amber when 1 hour or less, red with "overdue" when past due. Sort the pending list by SlaDueOn, earliest first. Show an "Escalated" marker when EscalatedOn is set.
+
+2) Decided tables, column order: 1 "Created" (CreatedOn in UK time), 2 "SLA" (e.g. "4 working hours", with "Met" in green when DecidedOn <= SlaDueOn or "Missed" in red otherwise), 3 "Decided" (DecidedOn in UK time), then Customer Id, Name, Request, Decision, Decision Owner, Note and Response sent.

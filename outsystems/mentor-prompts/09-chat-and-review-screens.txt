@@ -1,0 +1,8 @@
+In this app, use the public elements from Branch Concierge Demo: the event CustomerRequestReceived, the service actions ListReplies, ListReviewCases and RecordReviewDecision, and the role DecisionOwner.
+
+1) Change the chat so a workflow answers it: when the customer sends a message, show it in the conversation, then trigger CustomerRequestReceived with the session id, the customer id from the CustomerId input and the message, instead of calling the agent directly. Every 2 seconds, call ListReplies with the session id and the last reply Id received, and append new replies to the conversation (render them as markdown like today, with Route and Reasons under each). Show a "Waiting for the concierge..." indicator until the first reply for that message arrives. Keep polling for as long as the chat screen is open, not just until the first reply: a request held for review gets a holding reply first and the decision outcome later.
+
+2) Add a screen ReviewCases for people with the DecisionOwner role, linked from the menu as "Review cases":
+- List the pending review cases, newest first: created on, customer id and name, the customer's request, the proposed reply, and the gate's reasons.
+- Each case has a Note input and two buttons, Approve and Reject. Each button calls RecordReviewDecision with the case Id, Approved true or false and the note, shows the returned Message as a feedback message, and refreshes the list.
+- A toggle "Show decided cases" lists approved and rejected cases instead (call ListReviewCases with "approved" and with "rejected"; there is no "decided" status), newest first, with decision, decision owner, decided on and note.

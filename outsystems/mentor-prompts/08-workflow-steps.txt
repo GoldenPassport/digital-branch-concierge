@@ -1,0 +1,15 @@
+Prepare this app for a workflow that runs each customer request from the outside: the workflow calls the agent, then the impact and policy gate, then hands review cases to a decision owner. Do not change the agent, its actions, the system prompt, the gate's rules or the guardrail. Keep CallBranchConcierge working exactly as it does now: the agent evaluations use it. No SQL nodes, no timers, keep TotalCallsCount >= 6.
+
+1) Public event CustomerRequestReceived with inputs SessionId (Text), CustomerId (Text) and Message (Text).
+
+2) Entity ConciergeReply: SessionId (Text 50), Text (Text 4000), Kind (Text 20: reply, holding, refused, outcome), Route (Text 20), Reasons (Text 1000), CreatedOn (DateTime).
+
+3) Public service action RunAgent(SessionId, CustomerId, Message) returns Reply (Text), Refused (Boolean), Reasons (Text) and TurnStart (DateTime). It does what CallBranchConcierge does up to and including AgentFlow, without the gate: record TurnStart, run AgentFlow, and return the agent's reply. If the guardrail blocks the request, handle it as CallBranchConcierge does (DecisionLog row, policy flag) and return Refused true, Reasons "input guardrail: prompt attack detection" and the refusal reply.
+
+4) Public service action RunImpactPolicyGate(SessionId, Message, Reply, TurnStart) returns Route, Reasons and ReviewCaseId. It does what CallBranchConcierge does after AgentFlow: read this turn's DecisionLog rows since TurnStart, work out MaxRisk, call ImpactPolicyGate, and when Route is review create the ReviewCase (Status pending) and return its Id. Do not trigger ReviewRequested from here.
+
+5) Public service action DeliverReply(SessionId, Text, Kind, Route, Reasons) creates a ConciergeReply row. When Kind is "holding" use the text "Thank you. A member of staff will review this and come back to you shortly."
+
+6) Public service action ListReplies(SessionId, AfterId Long Integer default 0) returns the ConciergeReply rows for the session with Id greater than AfterId, oldest first.
+
+7) Public service action RunAgentFollowUp(ReviewCaseId) returns Reply. Read the review case, its customer and the decision owner's decision and note. Call the agent once more in the same session with this message: "A member of staff has decided the request you held for review. Decision: <decision>. Note: <note>. Tell the customer what was decided, in one or two sentences. Do not decide anything yourself and do not offer to change the decision." Then run RunImpactPolicyGate on the reply; if its route is review, return "Thank you for waiting. A member of staff will contact you about this shortly." instead.

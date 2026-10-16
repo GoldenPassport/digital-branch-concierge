@@ -1,0 +1,21 @@
+PART A - send in Branch Concierge Demo (the agentic app). Let the decision owner edit the reply before it goes to the customer. Do not change the agent, the system prompt, the gate's rules, the guardrail or CallBranchConcierge.
+
+1) Entity ReviewCase: add FinalReply (Text 4000).
+
+2) RecordReviewDecision: add an optional input EditedReply (Text, default empty). When it is not empty and differs from the case's ProposedReply, store it in FinalReply and write a DecisionLog row with Step "decision_owner_edit", Outcome "edited", Reason "reply edited by the decision owner". Everything else stays as it is.
+
+3) GetReviewCaseSummary and ListReviewCases: also return FinalReply.
+
+4) RunAgentFollowUp: when the case was approved and FinalReply is not empty, call the agent with this message instead: "A member of staff has approved the request you held for review and has written the reply for the customer. Send it exactly as written: <FinalReply>". Keep the gate check on the result and the existing fallback.
+
+5) ReviewCase: add OutcomeReply (Text 4000). At the end of RunAgentFollowUp, store the reply it returns (after the gate check and any fallback) in the case's OutcomeReply, so the case records what the customer was actually sent. Also store it when the workflow sends the timeout message: add a public service action SetOutcomeReply(ReviewCaseId, Text). ListReviewCases and GetReviewCaseSummary also return OutcomeReply.
+
+PART B - send in Branch Concierge Demo test app, after publishing part A and refreshing the dependency on RecordReviewDecision.
+
+1) ReviewCases, pending table, Proposed Reply column: show the reply formatted by default, using the DisplayHTML block with IsMarkdown True, as before. Under it, a small link "Edit". Clicking Edit for a row swaps that row's formatted view for a text area bound to the row's reply (full width of the cell, about 8 lines), with a link "Done" under it. Done swaps back to the formatted view, which must show the edited text. Only one row needs to be in edit mode at a time; keep the edit state per row (for example the Id of the row being edited in a local variable).
+
+2) DisplayHTML must re-render when its Value changes, not only on ready: add an OnParametersChanged handler that runs the same rendering as OnReady.
+
+3) Approve and Reject: pass the row's current reply text as EditedReply to RecordReviewDecision (the action ignores it when it is unchanged).
+
+4) Decided tables: show the decision owner's note in a "Note" column and add a column "Response sent" showing OutcomeReply (what the customer actually received), formatted with DisplayHTML; when OutcomeReply is empty show "Awaiting response".
