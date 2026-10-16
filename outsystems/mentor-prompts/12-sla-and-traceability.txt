@@ -14,7 +14,11 @@ SLAs on human review, in working hours: 09:00 to 17:00, Monday to Friday, UK tim
 
 6) ListReviewCases and GetReviewCaseSummary: also return SlaWorkingHours, SlaDueOn, EscalatedOn and ProcessInstanceId.
 
+7) Keep evaluation runs out of the decision owner's queue. Add IsEvaluation (Boolean) to ReviewCase, set when the SessionId does not come from the workflow (CallBranchConcierge is only called by the evaluations). ListReviewCases excludes evaluation cases unless a new input IncludeEvaluation is True. Add a public service action ClearEvaluationRun(SessionPrefix Text) that deletes the review cases, replies, memory and sessions whose SessionId starts with the prefix, for use as the dataset's teardown action.
+
 PART B - send in Branch Concierge Demo test app (add the new public elements first).
+
+0) The chat polls ListReplies every 2 seconds, and each poll is a trace; it used up the stage's daily trace limit. Poll every 5 seconds, and stop polling a message once its final reply (Kind reply, refused, outcome) has arrived; resume only while a message is waiting.
 
 1) ReviewCases pending table, first three columns: "Created" (CreatedOn in UK time), "SLA" (e.g. "4 working hours"), "Action before" (SlaDueOn in UK time, e.g. "Fri 16 Oct 17:00"), shown green when more than 1 working hour is left, amber when 1 hour or less, red with "overdue" when past due. Sort the pending list by SlaDueOn, earliest first. Show an "Escalated" marker when EscalatedOn is set.
 
