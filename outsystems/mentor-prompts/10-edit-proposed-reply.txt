@@ -1,4 +1,4 @@
-PART A - send in Branch Concierge Demo (the agentic app). Let the decision owner edit the reply before it goes to the customer. Do not change the agent, the system prompt, the gate's rules, the guardrail or CallBranchConcierge.
+PART A - send in Branch Concierge Agent (the agent app). Let the decision owner edit the reply before it goes to the customer. Do not change the agent, the system prompt, the gate's rules, the guardrail or CallBranchConcierge.
 
 1) Entity ReviewCase: add FinalReply (Text 4000).
 
@@ -10,7 +10,7 @@ PART A - send in Branch Concierge Demo (the agentic app). Let the decision owner
 
 5) ReviewCase: add OutcomeReply (Text 4000). At the end of RunAgentFollowUp, store the reply it returns (after the gate check and any fallback) in the case's OutcomeReply, so the case records what the customer was actually sent. Also store it when the workflow sends the timeout message: add a public service action SetOutcomeReply(ReviewCaseId, Text). ListReviewCases and GetReviewCaseSummary also return OutcomeReply.
 
-PART B - send in Branch Concierge Demo test app, after publishing part A and refreshing the dependency on RecordReviewDecision.
+PART B - send in Branch Concierge Chatbot App, after publishing part A and refreshing the dependency on RecordReviewDecision.
 
 1) ReviewCases, pending table, Proposed Reply column: show the reply formatted by default, using the DisplayHTML block with IsMarkdown True, as before. Under it, a small link "Edit". Clicking Edit for a row swaps that row's formatted view for a text area bound to the row's reply (full width of the cell, about 8 lines), with a link "Done" under it. Done swaps back to the formatted view, which must show the edited text. Only one row needs to be in edit mode at a time; keep the edit state per row (for example the Id of the row being edited in a local variable).
 

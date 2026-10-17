@@ -1,4 +1,4 @@
-PART A - send in Branch Concierge Demo (the agentic app), after prompt 11. Do not change the agent, the system prompt, the gate's rules, the guardrail or CallBranchConcierge.
+PART A - send in Branch Concierge Agent (the agent app), after prompt 11. Do not change the agent, the system prompt, the gate's rules, the guardrail or CallBranchConcierge.
 
 SLAs on human review, in working hours: 09:00 to 17:00, Monday to Friday, UK time (Europe/London, so BST in summer and GMT in winter). Approval cases (Kind approval) must be decided within 4 working hours; review cases (Kind review) within 8 working hours (one working day). No bank holiday calendar for now.
 
@@ -16,7 +16,7 @@ SLAs on human review, in working hours: 09:00 to 17:00, Monday to Friday, UK tim
 
 7) Keep evaluation runs out of the decision owner's queue. Add IsEvaluation (Boolean) to ReviewCase, set when the SessionId does not come from the workflow (CallBranchConcierge is only called by the evaluations). ListReviewCases excludes evaluation cases unless a new input IncludeEvaluation is True. Add a public service action ClearEvaluationRun(SessionPrefix Text) that deletes the review cases, replies, memory and sessions whose SessionId starts with the prefix, for use as the dataset's teardown action.
 
-PART B - send in Branch Concierge Demo test app (add the new public elements first).
+PART B - send in Branch Concierge Chatbot App (add the new public elements first).
 
 0) The chat polls ListReplies every 2 seconds, and each poll is a trace; it used up the stage's daily trace limit. Poll every 5 seconds, and stop polling a message once its final reply (Kind reply, refused, outcome) has arrived; resume only while a message is waiting.
 

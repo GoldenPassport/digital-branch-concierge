@@ -18,23 +18,34 @@ You do not need to rebuild anything: import the files below.
 
 | File | What it is |
 | --- | --- |
-| `oml/Branch Concierge Demo.oml` | The agentic app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the test app use. Seeds the demo data on publish. |
-| `oml/Branch Concierge Demo test app.oml` | The customer chat, which starts a workflow per message and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
-| `workflow/ConciergeRequest.oml` | The workflow that runs each request: agent, gate, decision owner, reply. |
+| `oml/Branch Concierge Agent.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
+| `oml/Branch Concierge Chatbot App.oml` | The customer chat, which starts a workflow per message and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
+| `workflow/Branch Concierge Workflow.oml` | The workflow that runs each request: agent, gate, decision owner, reply. |
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
 | `mentor-prompts/01` to `12` | The requests that built the two apps, in order. See `mentor-prompts/README.md`. |
 
 Shared data, in `../shared`, is also used by the n8n and LangGraph builds:
 four demo customers (one with an open complaint, one with a vulnerability
 flag), two knowledge documents and the twelve test conversations. The
-agentic app seeds the same customers and knowledge itself, so there is
+agent app seeds the same customers and knowledge itself, so there is
 nothing to load by hand.
+
+## Names
+
+| In ODC | What it is |
+| --- | --- |
+| Branch Concierge Agent | The agent app: agent, skills, tools, gate, audit log, review cases |
+| Branch Concierge Chatbot App | The customer chat and the Review cases screen (`/BranchConciergeChatbotApp/Chat`) |
+| Branch Concierge Workflow | The workflow that runs each request |
+
+The apps were renamed from Branch Concierge Demo and Branch Concierge Demo
+test app on 17 October 2026; an app's URL follows its name.
 
 ## The shape
 
 ```
-Chat (test app) ─ raises CustomerRequestReceived
-  └─> ConciergeRequest workflow (one instance per request)
+Chat (chatbot app) ─ raises CustomerRequestReceived
+  └─> Branch Concierge Workflow (one instance per request)
         ├─> RunAgent               the agent, with seven actions; identity bound by the process
         ├─> RunImpactPolicyGate    deterministic, no model call; creates a review case when it holds
         └─> GateFlag
@@ -52,7 +63,7 @@ Chat (test app) ─ raises CustomerRequestReceived
 - The decision owner's decision is final. The agent is called again only to
   word the outcome for the customer, and the gate checks that wording too.
 - A guardrail refusal goes straight to the customer with route `refused`.
-- `CallBranchConcierge`, the service action ODC generated with the agentic
+- `CallBranchConcierge`, the service action ODC generated with the agent
   app, runs the same agent and gate in one call. The evaluations use it.
 
 ## Import it
@@ -63,7 +74,7 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    in with your organisation address (for example `yourname.outsystems.dev`).
 2. **Turn on prompt attack detection.** Portal > Configure > Agent guardrails
    > Edit: switch on Prompt attack detection, keep Block request and raise
-   exception, Save and apply. The agentic app turns the block into a polite
+   exception, Save and apply. The agent app turns the block into a polite
    refusal.
 3. **Add the model.** Portal > Integrate > AI models > Add AI model > Custom
    connection, named `deepseek-flash`. Endpoint: name and model id
@@ -71,26 +82,26 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    `/chat/completions`), priority 1. Headers: `Authorization` =
    `Bearer <your key>` and `Content-Type` = `application/json`. Test
    endpoint, Add, then Save the model page.
-4. **Import the agentic app.** ODC Studio > Organization > Open Files >
-   `oml/Branch Concierge Demo.oml`. In Automations > Agents > CallAgent,
+4. **Import the agent app.** ODC Studio > Organization > Open Files >
+   `oml/Branch Concierge Agent.oml`. In Automations > Agents > CallAgent,
    check the AI model is `deepseek_flash` (or choose yours), then
    1-Click Publish. Publishing seeds the demo data.
-5. **Import the test app.** Open `oml/Branch Concierge Demo test app.oml`
+5. **Import the chatbot app.** Open `oml/Branch Concierge Chatbot App.oml`
    the same way. If Studio reports outdated references, use Manage
-   dependencies to refresh Branch Concierge Demo, then 1-Click Publish.
+   dependencies to refresh Branch Concierge Agent, then 1-Click Publish.
 6. **Import the workflow.** Portal > Workflows > Import >
-   `workflow/ConciergeRequest.oml`, open it and Publish. Publish the apps
+   `workflow/Branch Concierge Workflow.oml`, open it and Publish. Publish the apps
    first: the workflow starts on their `CustomerRequestReceived` event.
 7. **Make yourself the decision owner.** Portal > Govern > Users > your user
-   > End-user access > Manage roles: Branch Concierge Demo, Development stage,
+   > End-user access > Manage roles: Branch Concierge Agent, Development stage,
    DecisionOwner.
 8. **Check the sign-in provider.** The Review cases screen signs staff in
    through the stage's identity provider, named `OutSystems Community` in the
    Personal Edition. If Portal > Govern > Identity providers shows a different
-   name, change it in the test app's `DoExternalLogin` action and republish.
+   name, change it in the chatbot app's `DoExternalLogin` action and republish.
 9. **Optional: the evaluation.** Portal > Analyze > Agent evaluations: create
    a dataset from `evaluations/concierge-12.json`, then an evaluation on the
-   agentic app's service action with the Correctness, Safety, Guidelines,
+   agent app's service action with the Correctness, Safety, Guidelines,
    Relevance to Query and Tool Trajectory judges.
 
 To stay on the free trial model instead of DeepSeek, skip step 3 and choose
@@ -99,7 +110,7 @@ evaluation run considerably.
 
 ## Run it
 
-Open the test app, enter `C1003` as the CustomerId and try:
+Open the chatbot app, enter `C1003` as the CustomerId and try:
 
 | Message | Expected |
 | --- | --- |
@@ -115,10 +126,10 @@ earlier policy request.
 
 Where to look afterwards:
 
-- **Portal > Workflows > ConciergeRequest > instances**: one instance per
+- **Portal > Workflows > Branch Concierge Workflow > instances**: one instance per
   request, labelled with the customer, the session and the message.
 - **Portal > Monitor > Traces**: each model call, skill and gate with timings.
-- **ODC Studio > Data tab** in the agentic app: `DecisionLog` (every
+- **ODC Studio > Data tab** in the agent app: `DecisionLog` (every
   authorisation, gate and decision row), `ReviewCase` (who decided, when, the
   note) and `Customer` (the phone number after an approval).
 

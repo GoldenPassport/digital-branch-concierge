@@ -9,16 +9,20 @@ should not need the fix-up prompts. Prompt 06 needs prompt attack detection
 switched on in the Portal first. Mentor on the Personal Edition has a daily
 usage limit; six prompts fitted in one day, ten did not.
 
+App names: the prompts use the current names, Branch Concierge Agent (the
+agent app) and Branch Concierge Chatbot App. When they were first sent the
+apps were called Branch Concierge Demo and Branch Concierge Demo test app.
+
 Prompts 07 to 09 add the outer process (work in progress, October 2026):
 
-- 07 (agentic app): the DecisionOwner role, the ReviewRequested and
+- 07 (agent app): the DecisionOwner role, the ReviewRequested and
   ReviewDecided events, and the actions to list, read and decide review cases.
-- 08 (agentic app): the CustomerRequestReceived event and the steps a workflow
+- 08 (agent app): the CustomerRequestReceived event and the steps a workflow
   calls in turn: RunAgent, RunImpactPolicyGate, DeliverReply, ListReplies and
   RunAgentFollowUp. CallBranchConcierge stays as it is for the evaluations.
-- 09 (test app): the chat raises CustomerRequestReceived and shows the replies
+- 09 (chatbot app): the chat raises CustomerRequestReceived and shows the replies
   the workflow delivers, plus a Review cases screen for the decision owner.
-  Before sending 09, add the elements from Branch Concierge Demo to the test
+  Before sending 09, add the elements from Branch Concierge Agent to the chatbot
   app with App > Add public element; Mentor does not add them itself.
 
 Prompts 10 to 12 complete it:

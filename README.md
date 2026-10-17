@@ -16,7 +16,7 @@ keywords to a named decision owner.
 | --- | --- |
 | `n8n/` | Built and run end to end on n8n cloud: workflows, README and test evidence. |
 | `langgraph/` | Built and run end to end with LangGraph, LangChain and LangSmith: typed state graph, skills, gates, tests, evaluation and README. |
-| `outsystems/` | Built in OutSystems Developer Cloud: the agentic app and test app as OML files, the workflow, the evaluation dataset, the Mentor prompts and README. |
+| `outsystems/` | Built in OutSystems Developer Cloud: the agent app and chatbot app as OML files, the workflow, the evaluation dataset, the Mentor prompts and README. |
 | `shared/` | Demo customer records, knowledge documents and the test conversations every build uses. See its README for the two versions of the test set. |
 
 - Article: https://www.goldenpassport.blog/blog/digital-branch-concierge

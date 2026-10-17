@@ -1,4 +1,4 @@
-Send in Branch Concierge Demo (the agentic app), after prompt 10 part A. Do not change the agent, its actions, the system prompt or the guardrail. Keep CallBranchConcierge returning Route straight_through or review exactly as now: the agent evaluations use it. No SQL nodes, no timers, keep TotalCallsCount >= 6.
+Send in Branch Concierge Agent (the agent app), after prompt 10 part A. Do not change the agent, its actions, the system prompt or the guardrail. Keep CallBranchConcierge returning Route straight_through or review exactly as now: the agent evaluations use it. No SQL nodes, no timers, keep TotalCallsCount >= 6.
 
 1) Gate flags for the workflow. In RunImpactPolicyGate only (not in ImpactPolicyGate or CallBranchConcierge), return an extra output Flag (Text): "straight_through" when Route is straight_through; "approval" when the reasons include "skill risk medium" or "skill risk high" (the agent wants to change something); otherwise "review". Store Flag on the ReviewCase as Kind (new attribute, Text 20: approval or review).
 
@@ -12,6 +12,6 @@ Send in Branch Concierge Demo (the agentic app), after prompt 10 part A. Do not 
 
 6) Public service action ExportLearningAsEvalCases() returns a JSON text in the Agent evaluations dataset format (name, inputs UserInput/SessionId/CustomerId, expectations expectedResponse Response/Route/Reasons) for all promoted examples, so they can be added to the concierge-12 dataset.
 
-PART B - send in Branch Concierge Demo test app afterwards (add the new public elements first):
+PART B - send in Branch Concierge Chatbot App afterwards (add the new public elements first):
 - ReviewCases: show Kind as a column. For Kind approval keep Approve / Reject. For Kind review show Release, Send back (requires the note as guidance) and Take over, calling RecordReviewOutcome with the edited reply.
 - New screen Learning (DecisionOwner role, menu "Learning"): lists LearningExamples newest first with a Promote button for unpromoted ones, a "Show promoted only" toggle, and a button "Export as evaluation cases" that shows the JSON from ExportLearningAsEvalCases in a read-only text area.
