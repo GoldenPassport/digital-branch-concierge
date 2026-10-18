@@ -18,8 +18,8 @@ You do not need to rebuild anything: import the files below.
 
 | File | What it is |
 | --- | --- |
-| `oml/Branch Concierge Agent.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
-| `oml/Branch Concierge Chatbot App.oml` | The customer chat, which starts a workflow per message and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
+| `apps/Branch Concierge Agent.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
+| `apps/Branch Concierge Chatbot App.oml` | The customer chat, which starts a workflow per message and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
 | `workflow/Branch Concierge Workflow.oml` | The workflow that runs each request: agent, gate, decision owner, reply. |
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
 | `mentor-prompts/01` to `12` | The requests that built the two apps, in order. See `mentor-prompts/README.md`. |
@@ -83,10 +83,10 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    `Bearer <your key>` and `Content-Type` = `application/json`. Test
    endpoint, Add, then Save the model page.
 4. **Import the agent app.** ODC Studio > Organization > Open Files >
-   `oml/Branch Concierge Agent.oml`. In Automations > Agents > CallAgent,
+   `apps/Branch Concierge Agent.oml`. In Automations > Agents > CallAgent,
    check the AI model is `deepseek_flash` (or choose yours), then
    1-Click Publish. Publishing seeds the demo data.
-5. **Import the chatbot app.** Open `oml/Branch Concierge Chatbot App.oml`
+5. **Import the chatbot app.** Open `apps/Branch Concierge Chatbot App.oml`
    the same way. If Studio reports outdated references, use Manage
    dependencies to refresh Branch Concierge Agent, then 1-Click Publish.
 6. **Import the workflow.** Portal > Workflows > Import >
