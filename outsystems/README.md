@@ -19,8 +19,8 @@ You do not need to rebuild anything: import the files below.
 | File | What it is |
 | --- | --- |
 | `apps/Branch Concierge Agent.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
-| `apps/Branch Concierge Chatbot App.oml` | The customer chat, which starts a workflow per message and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
-| `workflow/Branch Concierge Workflow.oml` | The workflow that runs each request: agent, gate, decision owner, reply. |
+| `apps/Branch Concierge Chatbot App.oml` | The customer chat, which starts a workflow per case, passes follow-up messages into it and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
+| `workflow/Branch Concierge Workflow.oml` | The workflow that runs each case: agent, gate, decision owner, reply, and the wait for the customer's answer. |
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
 | `mentor-prompts/01` to `12` | The requests that built the two apps, in order. See `mentor-prompts/README.md`. |
 
@@ -44,20 +44,43 @@ test app on 17 October 2026; an app's URL follows its name.
 ## The shape
 
 ```
-Chat (chatbot app) ─ raises CustomerRequestReceived
-  └─> Branch Concierge Workflow (one instance per request)
+Chat (chatbot app) ─ raises CustomerRequestReceived for a new case,
+                     CustomerReplied when the case is waiting for the customer
+  └─> Branch Concierge Workflow (one instance per case)
         ├─> RunAgent               the agent, with seven actions; identity bound by the process
         ├─> RunImpactPolicyGate    deterministic, no model call; creates a review case when it holds
         └─> GateFlag
-              ├─ StraightThrough ─> DeliverAgentReply ─> End
-              └─ NeedsReview ─> DeliverHoldingReply
+              ├─ StraightThrough ─> DeliverAgentReply ─> PrepareCustomerWait
+              └─ NeedsReview ─> DeliverHoldingReply ─> GetReviewTimeout
                                   └─> DecideReviewCase   human activity, DecisionOwner role,
                                                          closes on ReviewDecided for this case
-                                        └─> DecidedInTime (HasExpired?)
-                                              ├─ Decided  ─> RunAgentFollowUp ─> DeliverOutcome ─> End
+                                        └─> DecidedInTime
+                                              ├─ Decided  ─> GetReviewOutcome ─> ReviewOutcome
+                                              │     approve, take over, or send back with guidance;
+                                              │     a send-back reruns the agent and can go back
+                                              │     to review (Go to GetReviewTimeout)
                                               └─ TimedOut ─> DeliverStaffWillContact ─> End
+
+PrepareCustomerWait ─> CustomerToAnswer (did the agent ask the customer something?)
+  ├─ Done ─> End
+  └─ WaitForCustomer ─> WaitForCustomerReply   closes on CustomerReplied for this session,
+                                               or after CustomerReplyTimeoutMinutes (30)
+        ├─ Replied  ─> Go to RunAgent          same instance, same case
+        └─ TimedOut ─> CloseCustomerWait ─> End
 ```
 
+- One workflow instance per case. The instance waits for the decision owner
+  and, when the agent asks the customer a question, for the customer's
+  reply. A reply goes back into the same instance; a message sent while a
+  review is pending is logged on the open case instead of starting a new one.
+- The customer wait is 30 minutes, set by the agent app's
+  `CustomerReplyTimeoutMinutes` setting (Portal > the app > Configuration).
+  A real service would more likely let a later message reopen the case.
+- Two deadlines on a review case: the policy SLA (the hard upper limit) and
+  the customer's expectation, which the agent picks up from the conversation
+  ("can I see someone today?") and which can only bring the deadline
+  forward. Review Cases shows the effective one and why.
+- Loops show as **Go to** nodes in the editor, not as arrows back up.
 - The workflow holds no business rules. It runs the standard steps in order
   and follows the gate's flag.
 - The decision owner's decision is final. The agent is called again only to
@@ -84,7 +107,8 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    endpoint, Add, then Save the model page.
 4. **Import the agent app.** ODC Studio > Organization > Open Files >
    `apps/Branch Concierge Agent.oml`. In Automations > Agents > CallAgent,
-   check the AI model is `deepseek_flash` (or choose yours), then
+   check the AI model is `deepseek_flash`, shown as
+   `Calldeepseek_flash` (or choose yours), then
    1-Click Publish. Publishing seeds the demo data.
 5. **Import the chatbot app.** Open `apps/Branch Concierge Chatbot App.oml`
    the same way. If Studio reports outdated references, use Manage
@@ -127,7 +151,7 @@ earlier policy request.
 Where to look afterwards:
 
 - **Portal > Workflows > Branch Concierge Workflow > instances**: one instance per
-  request, labelled with the customer, the session and the message.
+  case, labelled with the customer, the session and the message.
 - **Portal > Monitor > Traces**: each model call, skill and gate with timings.
 - **ODC Studio > Data tab** in the agent app: `DecisionLog` (every
   authorisation, gate and decision row), `ReviewCase` (who decided, when, the
@@ -137,8 +161,14 @@ Where to look afterwards:
 
 - **One editor tab per workflow.** If the workflow editor says the workflow
   is already open, close the other tab.
-- **Publishing over an earlier import** can ask to override a newer revision.
-  Use Compare first, then Merge and publish.
+- **Publishing over an earlier import** can show **Override revisions**.
+  Use **Compare revisions** first; choose **Override with this revision** only
+  when your file is the one you want. Opening the apps from Studio's asset
+  list rather than from a file avoids the prompt.
+- **Loops in the workflow** show as **Go to** nodes (↺ and the target step)
+  at the end of a branch, not as arrows back up the canvas.
+- **Publishing an app opened from a file saves it back into that file.**
+  Work on a copy if you want to keep the original export unchanged.
 - **Personal Edition limits:** one Development stage, eight active components
   (this build uses three), and the environment sleeps after 72 hours unused.
   The first call after a quiet spell can time out; send it again.
