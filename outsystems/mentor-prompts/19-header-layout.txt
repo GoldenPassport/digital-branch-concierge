@@ -1,0 +1,13 @@
+Send in Branch Concierge Chatbot App. Layout only (layout blocks, Chat screen, stylesheet); do not change logic, the event-driven flow or polling.
+
+1) Top header row of the app (the bar with the logo and the "Review cases" and "Log out" buttons): put the title "Branch Concierge Chatbot App" next to the logo, left aligned, and right align the "Review cases" and "Log out" buttons. Apply this in the layout so ReviewCases and CaseDetail get the same header.
+
+2) Chat screen, the card's own header row (where "Branch Concierge Chatbot App" and the second logo are today): remove that title and logo. In their place, left aligned, put the customer input with minimal text: a small label "Customer" and the CustomerId input (compact, about 160px wide), no help text.
+
+3) Chat screen, same card header row, right aligned: the current case info that today sits above the conversation (CaseNumber, Headline truncated to one line, status badge, and "Opened Wed 21 Oct 17:10" in small muted text). Remove the separate current-case bar above the conversation.
+
+4) Left sidebar: remove the old Inputs block (title "Inputs", the help text "The inputs bellow will be used...", and the CustomerId input, now in the card header). The sidebar shows only "Your cases", scrolling inside the sidebar.
+
+5) Conversation: remove the old case header rows that still appear as agent messages (e.g. "Case 34 · started Wed 21 Oct 17:10 · Open" and "Earlier messages"); LoadChatHistory must not add them any more.
+
+When done, list every element you added or changed.

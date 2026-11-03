@@ -1,0 +1,17 @@
+PART A - send in Branch Concierge Agent (the agent app).
+
+Archive test data so a clean set of test conversations can start. Archive, do not delete: the audit trail (DecisionLog) stays.
+
+1) Add a public service action ArchiveTestData() and a Timer ArchiveTestDataNow (no schedule; run from the Portal) that calls it:
+- set Status "archived" on every CustomerCase and every ReviewCase that exists when it runs (keep their other values; add ArchivedOn DateTime to both entities and set it);
+- add Archived (Boolean, default False) to ChatMessage and ConciergeReply and set it to True on every existing row;
+- close every open Conversation / customer wait record (the same way CloseCustomerWait clears it) so no workflow-era state is left waiting.
+2) Exclude archived rows everywhere they are read for customers or reviewers: ListCustomerCases, GetCurrentCase, GetCaseDetail (return nothing for an archived case), ListCasesForReview, ListReviewCases, GetChatHistory (no archived messages and no archived cases, so restoring a customer starts empty), the agent's conversation context (BuildMessages' last turns), and ListReplies. EnsureCustomerCase and the "open case for a session" lookups must ignore archived cases.
+3) AutoCloseIdleCases: run hourly, not daily.
+4) The UK time formatting added for the SentForReview detail uses AddHours(..., 1). Replace it with a proper Europe/London conversion that handles both BST and GMT (last Sunday of March 01:00 UTC to last Sunday of October 01:00 UTC is BST, otherwise GMT), in a small reusable function ToUkTime(DateTime UTC), and use it wherever the agent app formats a UK time.
+5) CloseCustomerCase and AutoCloseIdleCases each add a Closed event, so an auto-closed case shows two "Case closed" rows. Keep only one: AutoCloseIdleCases passes its title ("Case closed after <n> hours without activity") to CloseCustomerCase, which writes the single Closed event.
+
+PART B - send in Branch Concierge Chatbot App. Layout only.
+
+1) Top header (layout block used by all screens): the logo and the title "Branch Concierge Chatbot App" on one line, title to the right of the logo, vertically centred, left aligned; the "Review cases" and "Log out" buttons pushed to the far right of the same row (e.g. a flex row with justify-content: space-between, or margin-left: auto on the button group).
+2) Delete the actions left unused in ReviewCases after the old tables were removed (ApprovedOnNavigate, Decide, DoneEditReply, EditReply, OpenHistory, PendingOnNavigate, RecordOutcome, RejectedOnNavigate, SendBack, SetLearningFlag, SetSort), unless CaseDetail uses them; then the app should have no Unused Action warnings.

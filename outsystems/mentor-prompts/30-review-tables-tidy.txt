@@ -1,0 +1,27 @@
+Send in Branch Concierge Chatbot App. ReviewCases screen only; do not change the CaseFileModal block, the decision logic, polling or the theme CSS.
+
+Actions now happen in the case modal (row click opens it), so the tables no longer need action columns.
+
+1) Inbox table:
+- Remove the Action column.
+- Split the Customer column into two columns: "Customer ID" (e.g. C1001) and "Customer name" (from the Customer entity, joined on CustomerId; empty if not found).
+- Add an "SLA status" column after "SLA due", shown as a small rounded badge: "On track" green (more than 1 working hour left), "Due soon" amber (1 hour or less), "Overdue" red (past SLA due). Use the same badge classes as the Decided table's SLA badges (sla-badge sla-badge-met / -soon / -overdue).
+- Column order: Case, Raised, Customer ID, Customer name, Headline, Kind, SLA due, SLA status.
+
+2) Decided table: remove the Action / Actions column if there is one, and split the Customer column the same way as the Inbox: "Customer ID" and "Customer name" (from the Customer entity, joined on CustomerId).
+
+3) Learnings table: remove the Actions column and the Final reply column. If the Actions column holds the only "Promote" button, move that button into the Learnings row (as a small link in the Promoted cell, shown only when Promoted is False) so promoting still works.
+
+4) Inbox button in the Inbox / Decided / Learnings toggle: show a small number badge after the word "Inbox" with the count of open items in the inbox (pending rounds), e.g. "Inbox (3)" rendered as "Inbox" plus a round badge with class "inbox-count". Hide the badge when the count is 0. The count must refresh with the screen's existing polling.
+
+5) Hero cards: add a row of 3 summary cards under the "Review Cases" title and above the "Updated hh:mm:ss" line and search box. The same cards show on all three tabs (Inbox, Decided, Learnings). Use OutSystems UI cards in a 3-column row (stack on phone), each with a large number and a small label underneath:
+- "Open cases": number of CustomerCase rows with Status open (not archived).
+- "SLA due today": number of pending review rounds whose SLA due falls today (UK time) and are not yet decided, including any already overdue; small subtext "<n> overdue" in red when any are past due.
+- "Learnings": number of LearningExample rows; small subtext "<n> promoted".
+Counts come from the database (aggregates or one server action), refresh with the screen's existing polling, and the cards are not clickable. Give the row the class "hero-cards" and each card the class "hero-card".
+
+6) Sorting, all three tables (Inbox, Decided, Learnings): make every column sortable by clicking its header (ascending, click again for descending), using the Table widget's OnSort event with a dynamic sort on the source aggregate or data action (one sort variable per table, e.g. InboxSort, DecidedSort, LearningsSort). Defaults: Inbox by SLA due ascending, Decided by decided time descending, Learnings by created descending. Sorting must work together with the existing search and pagination (go back to page 1 on a new sort) and survive the polling refresh. Computed columns (Customer name, SLA status) sort by their underlying value.
+
+7) Table summary, all three tables: just above each table header, show a small muted line with the totals for that tab, e.g. "Showing 1-10 of 23 items" plus, after a dot separator, a short breakdown: Inbox "· 4 overdue · 2 due soon", Decided "· 15 approved · 3 rejected", Learnings "· 5 promoted". The numbers follow the current search filter, and the line updates with paging, sorting and polling. Give it the class "table-summary".
+
+When done, list every element you added or changed.

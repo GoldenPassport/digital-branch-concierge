@@ -1,0 +1,28 @@
+PART A - send in Branch Concierge Agent (the agent app). Bug fixes found in testing; do not change the agent, the gate's rules or any public signature.
+
+A browser session can hold several cases over time, but only one may be open. Today several old cases of one session were still "open", so lookups picked the wrong one: the review round was attached to an old case, the decision's outcome was written to every open case of the session, and the new case collected the session's old messages.
+
+1) One open case per session: when EnsureCustomerCase creates a new case, first close every other open CustomerCase with the same SessionId (Status "closed", Outcome "superseded", ClosedOn now, CaseEvent Closed with Title "Case closed when a new request started").
+
+2) Every lookup of "the open case for a session" (RunImpactPolicyGate setting ReviewCase.CustomerCaseId, the AddCaseEvent call sites, PrepareCustomerWait, CloseCustomerWait, RecordReviewDecision, EscalateReviewCase, GetCurrentCase, TrackCaseForSession) must use the case whose ProcessInstanceId matches when a ProcessInstanceId is available, otherwise the latest open case by StartedOn (descending), never the first one found.
+
+3) RecordReviewDecision's SQL UpdateCaseOutcomeDetail updates every open case of the session. Make it update only the review round's case: WHERE {CustomerCase}.[Id] = @CustomerCaseId (pass ReviewCase.CustomerCaseId). Keep SET [OutcomeDetail] = ... without the entity prefix.
+
+4) TrackCaseForSession's SQL UpdateChatMsgCaseId tags every untagged message of the session. Only tag messages created at or after the case's StartedOn: add AND {ChatMessage}.[CreatedOn] >= @CaseStartedOn.
+
+5) GetCaseDetail returns an empty CaseNumber and Headline in the header (the chat popup title and the CaseDetail header are blank). Make sure the header is filled from the CustomerCase record, with the fallbacks "CASE-" + Id padded to 4 digits and the first 60 characters of the first customer message.
+
+6) The SentForReview event Detail shows the act-by time as "22 Oct 2026 12:00 UTC". Format it in UK time (Europe/London) as "act by Thu 22 Oct 13:00", like the Review cases screen.
+
+7) Data clean-up, as a public service action RepairCaseData() that is safe to run again, and call it once at the end of BootstrapCustomers: for each session keep only its latest case open (close the others as in 1); set OutcomeDetail back to "" on cases with no decided review round; move ChatMessage rows whose CreatedOn is before their case's StartedOn to the session's case that was open at that time (latest StartedOn not after the message); point each ReviewCase at the case of its session that was open when the review case was created.
+
+PART B - send in Branch Concierge Chatbot App (refresh the Branch Concierge Agent dependency first). Layout only.
+
+Chat screen:
+1) Left sidebar: the Inputs block (title, help text and the CustomerId input) stays fixed at the top; only the "Your cases" list below it scrolls, filling the remaining height.
+2) The conversation shows only the current case's messages and events, not earlier cases (earlier cases are in "Your cases").
+3) Timeline events between the messages: show them as a neat, compact table instead of loose centred text: columns Event, By, When (UK time, "Wed 21 Oct 17:10"), Detail; small muted text, aligned columns, a thin border, one row per event, consecutive events grouped in one table.
+4) Case popup: the content must scroll inside the popup (max height about 80% of the window); nothing may overflow below it. Use the same events table in the popup.
+
+ReviewCases screen:
+5) Remove the old full-width pending table under the new slim Inbox table (the slim table and CaseDetail replace it). Keep the Decided and Learnings tabs.

@@ -1,0 +1,32 @@
+Send in Branch Concierge Chatbot App. Goal: make the app valid (zero errors) after a migration. Do not change screens, blocks, the theme or any public service action signature unless an error requires it.
+
+Context: the case tables (CustomerCase, ReviewCase, ReviewRound, ReviewCaseEvent, CaseEvent, CaseEventKind, ChatMessage, CaseConversation, ConciergeReply, LearningExample), the case structures and all case server/service actions were copied into this app from Branch Concierge Agent. This app now OWNS the case data. Branch Concierge Agent keeps only the AI agent, its skills and the bank tables (Customer, Capability, KnowledgeSection, DecisionLog, ConciergeSession, ContactChangeRequest, Appointment, Memory) and exposes them through public service actions.
+
+Fix every error with these rules:
+
+1) Case data: every aggregate, SQL node, CRUD action and data type must use THIS app's own entities and structures (never the BranchConciergeAgent ones; a SQL node that lists CustomerCase_BranchConciergeAgent must list the local CustomerCase instead). Remove the dependency on any agent case entity once unused.
+
+2) Agent tables this app cannot write: replace
+   - CreateDecisionLog / CreateOrUpdate DecisionLog -> call service action LogDecision
+   - CreateOrUpdateConciergeSession / UpsertConciergeSession / updates of PolicyRequested -> UpsertConciergeSession
+   - Memory reads/deletes and DeleteConciergeSession in ClearEvaluationRun -> ClearSessionAgentData(SessionPrefix)
+   - UpdateContactChangeRequest (e.g. UpdateCCRRejected) -> SetContactChangeStatus(Reference, Status)
+   Reading DecisionLog, Customer, Capability, ContactChangeRequest through their public entities is fine.
+
+3) AI calls: this app must not call AgentFlow, BuildMessages, GetGroundingData, StoreMemory or any Call Agent node. Replace them with the agent app's public service actions:
+   - one agent turn (RunAgent, RunAgentFollowUp, RunAgentWithGuidance) -> AgentTurn(SessionId, CustomerId, Message, Guidance, History, LearningExamples); use its Reply, QuestionType, AwaitingCustomer, Reasons, TurnStartUtc instead of parsing the model output here. Build History from this app's ChatMessage rows and LearningExamples from promoted LearningExample rows, as the old flow did.
+   - the policy gate's view of this turn's skill calls -> GetTurnDecisions(SessionId, SinceUtc = TurnStartUtc)
+   - SummariseCustomerCase / RefreshCaseHeadline summary -> SummariseTranscript(Transcript) (Topics, Summary)
+   - TriageCustomerReply / ClassifyCustomerReplyFlow -> ClassifyCustomerReply(LastAgentReply, CustomerMessage, LastQuestionType)
+   - reply checks (ReplyCheckFlow) -> CheckAgentReply(AgentReply, CustomerMessage)
+   - carrying out an approved change after the customer confirms -> ExecuteSkill(SessionId, CustomerId, Capability, ParametersJson)
+   - customer name / flags -> GetCustomerContext(CustomerId) or the public Customer entity.
+   Keep every behaviour the old actions had (case writes, events, headline refresh, confirm flow, gate rules); only the AI and agent-table calls change.
+
+4) Events: create in this app the events CustomerRequestReceived, CustomerReplied, ReviewDecided and ReviewEscalated with the same payload attributes the agent app's events had, and make the Trigger Event nodes use them. (The workflow will be rebound to these by hand afterwards.)
+
+5) TrackCaseForSession: if it is missing, recreate it as a server action with the same behaviour (ensure a CustomerCase exists for the session and back-fill CaseId on untagged ChatMessages since the case started minus 2 minutes).
+
+6) The DecisionOwner role checks: keep using the BranchConciergeAgent DecisionOwner role.
+
+When done, list every element you added, changed or deleted, and anything you could not fix.

@@ -1,0 +1,13 @@
+Send in Branch Concierge Chatbot App, after prompt 13. First refresh the dependency on Branch Concierge Agent and add the public elements ListCustomerCases, GetCaseDetail and GetCurrentCase (Manage dependencies). Keep the event-driven flow, polling, LoadChatHistory and the "Behind the scenes" note under agent replies as they are. Add, do not replace.
+
+Chat screen: show the current case and the customer's case history.
+
+1) Current case header above the conversation: CaseNumber, Headline, a status tag (Open green, Waiting for staff amber when a review round is pending, Closed grey) and "opened " + OpenedOn in UK time. Get it from GetCurrentCase with the session id after each poll that brings a new reply. When there is no open case, show "New conversation".
+
+2) Conversation: show only the current case's messages (customer and agent bubbles as today). Between the bubbles, show the case's timeline events (from GetCaseDetail's Timeline where Kind is not CustomerMessage or AgentReply) as small centred event rows using the OutSystems UI Timeline Item pattern or a compact row: icon, Title, Actor, time in UK time, Detail in muted text. Examples: "Sent for approval · Gate · 11:02 · act by Mon 20 Oct 15:02", "Approved · Luke Audie · 11:20 · note". Customer-facing wording stays in the agent bubbles.
+
+3) Case history panel in the left sidebar under the CustomerId input, titled "Your cases": once a CustomerId is entered, call ListCustomerCases and list each case as a card: CaseNumber and status tag on one line, Headline in bold, Summary in muted text, opened date (and closed date when closed). Clicking a card opens that case read-only in the conversation area: a header with CaseNumber, Headline, Summary, status, Outcome, opened and closed dates, then the full timeline from GetCaseDetail (bubbles plus event rows), and a "Back to current conversation" link. The message input is disabled while viewing a past case. Refresh the list when a case opens or closes.
+
+4) Replace the old "Case N / Earlier messages" headers in LoadChatHistory with this: restoring a customer shows the open case (if any) in the conversation and every case in "Your cases".
+
+Publish when done and list every element you added or changed.

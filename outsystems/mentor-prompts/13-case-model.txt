@@ -1,0 +1,26 @@
+Send in Branch Concierge Agent (the agent app). Do not change the gate's rules, the guardrail, the workflow's public actions' existing inputs and outputs, or CallBranchConcierge. Add, do not replace. Use Aggregates and entity actions, not SQL nodes; if an SQL node is unavoidable, write UPDATE ... SET [Attribute] = ... (PostgreSQL does not allow {Entity}.[Attribute] on the left of SET).
+
+Goal: turn CustomerCase into the case record of a small case management system. One CustomerCase per workflow instance; everything that happens on it is visible as a timeline.
+
+1) CustomerCase: add CaseNumber (Text 20, unique index), Headline (Text 80), Summary (Text 300), ClosedOn (DateTime) and ProcessInstanceId (Text 50) if missing. When EnsureCustomerCase creates a case, set CaseNumber = "CASE-" + the Id padded to 4 digits (CASE-0042), after the create so the Id exists. Backfill CaseNumber for existing cases in BootstrapCustomers.
+
+2) Static entity CaseEventKind with: CustomerMessage, AgentReply, SentForReview, Decision, SentBack, Escalated, CustomerWait, TimedOut, Closed. Entity CaseEvent: CustomerCaseId (FK CustomerCase), OccurredOn (DateTime, UTC), Kind (CaseEventKind), Actor (Text 100: "Customer C1003", "Agent", "Gate", the decision owner's name, "Workflow"), Title (Text 120), Detail (Text 1000), ReviewCaseId (FK ReviewCase, optional). Index on CustomerCaseId + OccurredOn.
+
+3) Server action AddCaseEvent(CustomerCaseId, Kind, Actor, Title, Detail, ReviewCaseId optional) creates a CaseEvent; it never throws (log with LogMessage on failure). Write events at these points, finding the case by SessionId with Status "open" when the action does not have the case Id:
+- RunImpactPolicyGate, when it creates a ReviewCase: SentForReview, Actor "Gate", Title "Sent for approval" or "Sent for review" from Kind, Detail = the reasons + " · act by " + SlaDueOn in UK time. Also set ReviewCase.CustomerCaseId (add the FK) so each review round belongs to its case.
+- RecordReviewDecision: Decision, Actor = decision owner name, Title "Approved" / "Rejected" / "Sent back with guidance" / "Taken over", Detail = the note.
+- EscalateReviewCase: Escalated, Actor "Workflow", Title "SLA missed, escalated".
+- PrepareCustomerWait when it decides to wait: CustomerWait, Actor "Workflow", Title "Waiting for the customer".
+- CloseCustomerWait (timeout): TimedOut, Actor "Workflow", Title "No reply from the customer".
+- CloseCustomerCase: Closed, Actor "Workflow" or "Customer", Title "Case closed", Detail = the outcome; also set ClosedOn.
+Customer messages and agent replies stay in ChatMessage (already tagged with CaseId); do not copy them into CaseEvent.
+
+4) Headline and summary from the agent: in BuildMessages' OUTPUT FORMAT add two fields to the JSON the agent returns, "case_headline" (max 8 words, e.g. "Phone number change") and "case_summary" (one sentence, what the customer wants and where it stands). Add them to the structure DeserializeAgentResponse uses, default "". In RunAgent, after the case is tracked: if the case Headline is empty, set Headline and Summary from the reply; on later turns update Summary only when case_summary is not empty. If both are empty on the first turn, fall back to Headline = the first 60 characters of the customer's first message.
+
+5) Public service actions for the chatbot app (all read-only, ordered as stated):
+- ListCustomerCases(CustomerId) returns a list of CaseNumber, CustomerCaseId, Headline, Summary, Status, Outcome, OpenedOn (CreatedOn), ClosedOn, LastActivityOn, newest first.
+- GetCaseDetail(CustomerCaseId) returns the case header (CaseNumber, CustomerId, customer name, Headline, Summary, Status, Outcome, OutcomeDetail, OpenedOn, ClosedOn, ProcessInstanceId), the review rounds (ReviewCase rows for the case: Kind, Status, SlaWorkingHours, SlaDueOn, DecidedBy, DecidedOn, Note, ProposedReply, FinalReply), and Timeline: one list merging the case's ChatMessage rows (Kind CustomerMessage or AgentReply, Actor, Text, Route, Reasons, OccurredOn) and CaseEvent rows (Kind, Actor, Title, Detail, OccurredOn), sorted by OccurredOn ascending.
+- ListCasesForReview(View Text: "inbox" or "decided", SearchText optional) returns slim rows: CustomerCaseId, CaseNumber, ReviewCaseId, CustomerId, customer name, Headline, RaisedOn (ReviewCase CreatedOn), Kind, SlaWorkingHours, SlaDueOn, EscalatedOn, CurrentAction and, for decided, Decision, DecidedBy, DecidedOn, Outcome. Inbox = review cases with Status "pending", sorted by SlaDueOn earliest first; decided = approved or rejected, newest DecidedOn first. CurrentAction: "Approve or reject: " + the capability for Kind approval, "Review and decide" for Kind review, prefixed "Escalated - " when EscalatedOn is set. Exclude evaluation cases.
+- GetCurrentCase(SessionId) returns the open case for the session (CustomerCaseId, CaseNumber, Headline, Status, OpenedOn) or CustomerCaseId 0.
+
+Publish when done and list every element you added or changed.

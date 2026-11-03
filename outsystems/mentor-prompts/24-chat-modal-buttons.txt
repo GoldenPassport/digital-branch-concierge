@@ -1,0 +1,26 @@
+This change is in Branch Concierge Chatbot App (this app). Continue the earlier request that stopped at the usage limit: the QuestionType groundwork (ChatHistory.QuestionType filled from ListReplies, OnSendMessage accepting a text) is already done; do the rest below. Do not change the event-driven flow or polling.
+
+1) Quick replies: under the latest agent reply only, when its QuestionType is "confirm" show two buttons "Yes, go ahead" (primary) and "No, cancel"; when it is "closing" show "Yes, something else" and "No, that's all". Clicking a button sends that text exactly as if the customer typed it, and hides the buttons. Typing a reply still works.
+
+2) No open case: when the customer has no open case (GetCurrentCase returns 0, e.g. right after a case closes or when a customer is loaded), the header shows no case block and the conversation area shows only the empty start state ("How can I help you?"), with no earlier messages. Closed cases are reached through "Your cases". When the customer sends a message, the new case appears in the header and its messages in the conversation.
+
+3) Event log (the collapsible section in the case popup and on CaseDetail): list events newest first. Also list each customer message as a row: Event "Customer asked", By "Customer <id>", When, Detail = the message (one line, truncated with an ellipsis, full text on hover). Agent replies stay out of the Event log (they are in Conversation flow). The Conversation flow section stays oldest first.
+
+4) One reusable case modal. Turn the case popup into a block (e.g. CaseFileModal) with inputs CustomerCaseId, ReviewCaseId (optional), OpenSection ("overview" default, or "eventlog"), and ShowDecisionPanel (Boolean). Use it:
+- on the Chat screen for "Your cases" rows (as today);
+- on ReviewCases: clicking a row in the Inbox or Decided table opens this modal instead of navigating to CaseDetail; for a pending review round ShowDecisionPanel is True and the modal shows the decision panel (proposed reply editable, note, learning checkbox, Approve / Reject calling RecordReviewDecision as CaseDetail does today) inside the Review & approvals section (see 6); after a decision show the returned message, refresh the modal and the table. Keep CaseDetail as a screen but it is no longer linked from the tables.
+Modal width: min(960px, 92vw).
+
+5) Event rows in the live chat: remove the small event rows between the chat bubbles (e.g. "Sent for review · Gate · ..."). Instead add an "Event log" link in the chat header's case block (next to the case number). It opens the case modal for the current case with Overview and Conversation flow collapsed and the Event log section expanded.
+
+6) Review & approvals section in the case modal, shown only when the modal is opened from ReviewCases (add a block input ShowReviewSection, True from ReviewCases, False from the Chat screen, where the section is hidden). Collapsible, between Overview and Conversation flow; expanded when the case has a pending round, collapsed otherwise; hidden when the case has no review rounds. One card per review round, newest first:
+- header: Kind (Approval / Review) and a status badge (Pending amber, Approved green, Rejected red, Sent back grey, Taken over grey);
+- fields: Raised (UK time), Reasons, SLA (working hours) and act-by with Met / Missed / overdue colouring, Escalated marker, Decided by, Decided on, Note, Execution (awaiting confirmation / carried out / cancelled by customer / expired), Proposed reply and Reply the customer received (collapsed by default, expandable);
+- for a pending round, when ShowDecisionPanel is True, the decision controls (editable proposed reply, note, learning checkbox, Approve / Reject) sit inside this round's card, replacing the separate "Decision" block that CaseDetail shows today. Labels sit above their fields with no indent, the textareas fill the card width (3 rows each), and the Approve and Reject buttons sit together on one row at the bottom of the card.
+Remove the review fields (Kind, Decision, Decided by, Decided on, SLA) from the Overview grid in both places; Overview keeps the case fields only, so the customer-side modal shows no review details. Also fix: the Overview "Decision" field currently shows the decision owner's name instead of the decision.
+
+7) Menu block: add a "Chats" button to the left of "Review cases", same style, linking to the Chat screen, with the active page's button highlighted.
+
+8) CaseDetail today shows blank Overview fields and its Approve does nothing; the modal replaces it for reviewers, so make sure the modal's decision panel calls RecordReviewDecision with the round's own ReviewCaseId (from ListCasesForReview) and refreshes after the decision.
+
+When done, list every element you added or changed.

@@ -1,0 +1,13 @@
+Send in Branch Concierge Agent (the agent app). Bug fix found in testing; do not change the gate's rules or any public signature.
+
+A case can now hold several requests, so it can need several review rounds. Today, when a second request in the same case is held by the gate, RunImpactPolicyGate reuses the case's existing ReviewCase (it found round 36, the already-approved account closure, and overwrote it with the phone change, Kind approval, update_contact_details). The decided round loses its history, the reviewer's links point at a round that is "already decided", and the workflow waits on a round that never gets a ReviewDecided.
+
+1) RunImpactPolicyGate: whenever the gate holds a reply, always create a new ReviewCase row for this turn (same CustomerCaseId, SessionId and ProcessInstanceId, this turn's request, proposed reply, kind, reasons, SLA), never update an existing ReviewCase. Return the new ReviewCaseId so the workflow's DecideReviewCase activity waits on it. The SentForReview CaseEvent references the new ReviewCaseId.
+
+2) Every place that looks up "the review case" for a session or case (GetReviewCaseSummary, GetReviewOutcome, RecordReviewDecision's checks, ListCasesForReview, GetCaseDetail's review rounds, EscalateReviewCase) must use the ReviewCaseId it is given, or, when it must look one up, the latest pending round of that case by CreatedOn, never the first row found.
+
+3) ListCasesForReview: one row per pending (Inbox) or decided round, with that round's own ReviewCaseId, Kind, reasons and CurrentAction; the Headline column shows the case Headline.
+
+4) Data repair (run once from BootstrapCustomers, safe to run again): round 36 now holds the phone change; leave it pending as the phone change round, and write a CaseEvent on CASE-0040 "Review round reused (data repaired)" so the history explains it. No other rows change.
+
+When done, list every element you added or changed.

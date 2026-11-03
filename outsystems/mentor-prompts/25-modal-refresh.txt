@@ -1,0 +1,7 @@
+Send in Branch Concierge Chatbot App. Bug fix only.
+
+The CaseFileModal block opens empty on every screen (Chat "Your cases", Chat header "Event log" link, ReviewCases rows): no case data, no conversation, no review rounds, and OpenSection "eventlog" is not applied. Opening it sends no request for the case. The block only fetches on its first render, before the screen has set CustomerCaseId.
+
+1) In CaseFileModal add an OnParametersChanged event handler that, whenever CustomerCaseId, ReviewCaseId, OpenSection or ShowDecisionPanel change: refreshes the block's case data action (GetCaseDetail with the new CustomerCaseId), and sets the section expanded flags from OpenSection ("eventlog": Overview and Conversation flow collapsed, Event log expanded; "overview": Overview and Conversation flow expanded, Event log collapsed; Review & approvals expanded when a round is pending).
+2) Make the case data action not fetch at start when CustomerCaseId is 0/null, and show a small loading indicator while fetching.
+3) On the screens, set the modal's inputs before showing the popup (assign CustomerCaseId etc., then open), so the handler always runs with the right case.

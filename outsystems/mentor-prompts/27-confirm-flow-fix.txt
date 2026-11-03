@@ -1,0 +1,13 @@
+Send in Branch Concierge Agent (the agent app). Bug fixes found in testing prompt 22's confirm flow; do not change public signatures.
+
+Test (CASE-0040, workflow instance 172): the decision owner approved a held phone-number change (ReviewCase 36, Kind approval, update_contact_details). The workflow then ran RunAgentFollowUp, which told the customer "Thank you for waiting. A member of staff will contact you about this shortly." instead of asking whether to go ahead. The customer then typed "Yes, please go ahead with the phone number change."; RunAgent called the skill again and RunImpactPolicyGate held it for review a second time (route review, "skill risk medium"), so nothing was carried out.
+
+1) RunAgentFollowUp (the action the workflow calls to word the decision for the customer) must follow the confirm flow from prompt 22: for an approved round of Kind approval with a capability (e.g. update_contact_details), do not carry out the change and do not say staff will contact the customer; tell the customer it was approved and ask "Would you like me to go ahead?" (with the details, e.g. "change your phone number to +44 7700 900888"), set QuestionType "confirm" and AwaitingCustomer True, and leave ReviewCase.ExecutionStatus = "awaiting_confirmation". For rejected rounds pass on the note and end with the closing question. For Kind review rounds with no capability the agent can carry out (e.g. account closure), keep today's wording and end with the closing question.
+
+2) Pre-approved pass in RunImpactPolicyGate: when the case (by CustomerCaseId, or by SessionId when the case id is not passed) has a ReviewCase with Status "approved" and ExecutionStatus "awaiting_confirmation" for the same capability, and this turn calls that capability, return route "straight_through" with reason "pre-approved by <DecidedBy>", do not create a new ReviewCase, set ExecutionStatus "executed", and write CaseEvents "Customer confirmed" and "Action carried out" (capability + reference). Check this before any other rule that would hold the call.
+
+3) RecordReviewDecision: when Approved is True on a Kind approval round, make sure ExecutionStatus is set to "awaiting_confirmation" (the attribute is now Text 50).
+
+4) Data repair (safe to rerun, from BootstrapCustomers): ReviewCase 36 (CASE-0040) is approved; set its ExecutionStatus to "awaiting_confirmation" if empty. If a second pending ReviewCase was created for the same phone change in CASE-0040 by the repeat call, set its Status "cancelled" with Note "Duplicate of round 36 (data repaired)".
+
+When done, list every element you added or changed.

@@ -1,0 +1,9 @@
+Send in Branch Concierge Chatbot App. CaseFileModal block only; keep the existing classes chat-message-user / chat-message-agent and the theme CSS.
+
+1) Conversation flow: on every bubble, show the time next to the sender label, e.g. "Customer · Thu 22 Oct 09:26" and "Agent · Thu 22 Oct 09:27" (UK time, same format as elsewhere), from the timeline item's OccurredOn. Keep the label small and muted.
+
+2) Overview grid: remove the Status field (the status badge is in the modal header) and the Closed field (covered by the status). Keep Case, Customer, Opened, Outcome. Add:
+- SLA: the latest review round's working hours and act-by time in UK time, e.g. "4 working hours · act by Thu 22 Oct 13:27"; "No review" when the case has no review round.
+- SLA status: an icon plus a word: green tick "Met" (decided on or before act-by) or "On track" (pending, more than 1 working hour left); amber warning "Due soon" (pending, 1 hour or less left); red cross "Missed" (decided after act-by) or "Overdue" (pending, past act-by). Use Font Awesome icons (fa-check-circle, fa-exclamation-triangle, fa-times-circle) coloured green / amber / red. Empty when there is no review round.
+
+When done, list every element you added or changed.

@@ -1,0 +1,17 @@
+Send in Branch Concierge Chatbot App. ReviewCases screen only; do not change the CaseFileModal block, the decision/promote logic or the theme stylesheet.
+
+The three tables (Inbox, Decided, Learnings) load through data actions that call the agent app's service actions (ListCasesForReview, ListLearningExamples). Those cannot sort or page in the database. Replace them with screen aggregates that read the public entities directly, so the lists are plain data-driven app code:
+
+1) InboxAggr: ReviewCase with Status "pending", IsEvaluation False, ArchivedOn empty; join CustomerCase (ReviewCase.CustomerCaseId, with-or-without) for CaseNumber and Headline, and Customer (CustomerId, with-or-without) for Name. Filter by the existing search text (case number, customer id, customer name or headline, case-insensitive contains).
+2) DecidedAggr: same joins, ReviewCase with Status not "pending", IsEvaluation False, ArchivedOn empty, same search filter.
+3) LearningsAggr: LearningExample, same search filter on Request / Guidance / CustomerId.
+
+For each aggregate:
+- Dynamic sort from the existing sort variables (InboxSortCol/InboxSortDesc etc.) set by the tables' OnSort handlers; defaults Inbox SlaDueOn ascending, Decided DecidedOn descending, Learnings CreatedOn descending. SLA status sorts by SlaDueOn, Customer name by Customer.Name.
+- Paging in the database: Max Records = page size and Start Index from the existing pagination, so only the current page is fetched; the pagination uses the aggregate's Count for the total.
+- Bind the table rows, the Customer ID / Customer name / SLA status cells, the row click (open the case modal with the same inputs as today) and the table-summary line ("Showing a-b of Count items" plus the breakdown) to the aggregate. Keep the SLA status badge logic the same.
+- Refresh the aggregates (Refresh Data) wherever the old data actions were refreshed: the polling timer, search, Clear, sort, page change and after a decision or promote.
+
+Then delete the old data actions GetInboxCases, GetDecidedCases and GetLearningExamples (and any helper only they used), and remove the unused dependencies on ListCasesForReview / ListLearningExamples. Keep GetHeroCounts as it is.
+
+When done, list every element you added, changed or deleted.

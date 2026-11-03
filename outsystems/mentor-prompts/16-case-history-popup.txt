@@ -1,0 +1,15 @@
+PART A - send in Branch Concierge Agent (the agent app). Small data fixes; do not change anything else.
+
+1) Cases created before prompt 13 have an empty CaseNumber and Headline. Add a public service action BackfillCaseFields() and call it at the end of BootstrapCustomers: for every CustomerCase with an empty CaseNumber set "CASE-" + Id padded to 4 digits; with an empty Headline set it to the first 60 characters of the case's first customer ChatMessage (by CreatedOn), or "Conversation" when there is none. Use entity actions, not SQL.
+
+2) In ListCustomerCases and GetCaseDetail, never return an empty CaseNumber or Headline: apply the same fallbacks on the fly.
+
+3) A case whose conversation ended without triage closing it stays "open". When the workflow ends a case (PrepareCustomerWait decides not to wait, or CloseCustomerWait times out), call CloseCustomerCase for the session's open case with Outcome "answered" (no wait) or "timed_out", so the case closes with its workflow instance. Also add the Closed CaseEvent there.
+
+PART B - send in Branch Concierge Chatbot App (refresh the Branch Concierge Agent dependency first). Chat screen only.
+
+1) "Your cases" in the sidebar: make each case a compact row, not a tall card. Line 1: CaseNumber in bold and a small status tag on the right (Open green, Waiting for staff amber, Closed grey, readable text colour on each tag). Line 2: Headline, one line, truncated with an ellipsis. Line 3 in small muted text: "Opened Mon 19 Oct 15:21" and, when closed, " · Closed Mon 19 Oct 15:22". Tight padding, a thin divider between rows, hover highlight, newest first, the list scrolls inside the sidebar.
+
+2) Clicking a row opens a Popup (OutSystems UI Popup), not the conversation area: title "CaseNumber · Headline" with a close button; a header block with status tag, Outcome, Summary, opened and closed dates; then the case file timeline from GetCaseDetail, oldest first: customer and agent messages as chat bubbles (agent replies render markdown) and events (sent for review, decision, escalated, waiting, timed out, closed) as small centred rows with actor and UK time; review rounds listed with decision, decided by, decided on and note. The popup scrolls inside itself; the live conversation behind it is unchanged.
+
+3) Remove the read-only past-case view from the conversation area (ViewingCaseId, the "Back to current conversation" link and the disabled input) now that the popup replaces it.

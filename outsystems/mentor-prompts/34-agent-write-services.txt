@@ -1,0 +1,19 @@
+Send in Branch Concierge Agent (the agent app). Add public service actions only; do not change or delete any existing element or signature.
+
+The case logic is moving to the Branch Concierge Chatbot App. That app can read this app's public entities but cannot write them, and cannot read Memory (not public). Add these thin public service actions so it never needs to. None of them may touch the case tables (CustomerCase, ReviewCase, ReviewRound, ReviewCaseEvent, CaseEvent, ChatMessage, CaseConversation, ConciergeReply, LearningExample).
+
+1) LogDecision(CustomerId Text, CorrelationId Text, Step Text, Capability Text, Risk Text, Outcome Text, Reason Text) -> DecisionLogId Long Integer. Creates one DecisionLog row (CreatedOn = now).
+
+2) UpsertConciergeSession(SessionId Text, CustomerId Text, ProcessInstanceId Text, PolicyRequested Boolean, SetPolicyRequested Boolean). Creates the ConciergeSession for SessionId if missing, else updates CustomerId / ProcessInstanceId when not empty, and PolicyRequested only when SetPolicyRequested is True.
+
+3) ClearSessionAgentData(SessionPrefix Text) -> Success Boolean, Message Text. Deletes Memory and ConciergeSession rows whose SessionId starts with SessionPrefix (refuse prefixes shorter than 4 characters, like ClearEvaluationRun does today).
+
+4) SetContactChangeStatus(Reference Text, Status Text) -> Success Boolean. Updates the ContactChangeRequest with that Reference (e.g. "rejected", "cancelled").
+
+5) ExecuteSkill(SessionId Text, CustomerId Text, Capability Text, ParametersJson Text) -> Success Boolean, Reference Text, Message Text. Runs one skill directly for the confirm-then-execute step (e.g. update_contact_details with {"field":"phone","value":"+44..."}), writing its DecisionLog row as the skill does today.
+
+6) GetCustomerContext(CustomerId Text) -> Name, Segment, VulnerabilityFlag, OpenComplaint, Phone, Email. Read only.
+
+All six never throw: on failure log with LogMessage and return empty outputs / Success False. Keep the app valid.
+
+When done, list every element you added.

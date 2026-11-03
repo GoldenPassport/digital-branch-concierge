@@ -1,0 +1,15 @@
+Send in Branch Concierge Chatbot App, after prompt 19. Layout only; do not change logic, the event-driven flow or polling.
+
+ReviewCases screen:
+1) Inbox tab: always show the slim table with its header row. When there are no pending cases, show one empty-state row "No cases waiting for review. New requests appear here automatically." (the old empty message was removed with the old table).
+2) Decided tab: it shows two tables (the old full-width decided table and the new slim one). Remove the old one; keep the slim table (Case, Raised, Customer, Headline, Decision, Decided by, Decided on, SLA Met/Missed) with the same header and empty-state behaviour as the Inbox.
+
+Case popup on the Chat screen ("Your cases" -> click a row) and the CaseDetail screen: the same case file layout in both.
+3) The popup body scrolls inside the popup (max height about 80% of the window); the title row with the case number, headline and close button stays fixed at the top. The headline in the title is the case Headline, not the first message.
+4) Three collapsible sections (OutSystems UI Accordion or Section Expandable), in this order:
+- Overview (expanded by default): Summary, then a two-column field grid: Case, Status (badge), Customer (id and name), Opened, Closed (or "still open"), Last activity, Outcome, and for the latest review round: Kind, Decision, Decided by, Decided on, SLA and act-by with Met/Missed.
+- Conversation flow (expanded by default; rename the old "Timeline" heading): the customer touchpoints only, customer and agent messages as chat bubbles, oldest first. Everything else (gate, decisions, waits, closes) goes in the Event log.
+- Event log (collapsed by default): the events table with columns Event, By, When (UK time), Detail, oldest first.
+On CaseDetail, the decision panel (Approve/Reject) stays above the Conversation flow when the review round is pending.
+
+When done, list every element you added or changed.

@@ -1,0 +1,22 @@
+Send in Branch Concierge Agent (the agent app). Do not change the main agent's reply, the gate or any public signature.
+
+The case Headline is shown in the chat header, "Your cases", the case modal and the Review cases tables. Today it is set once (e.g. "i want to close my account") and goes stale when the case carries several requests. Make it a live status line, refreshed after every agent run.
+
+1) Headline format (max ~110 characters), built after each turn:
+"<n> request(s), <m> open · <short summary of the requests> · Next: <next step> (<who>)"
+Examples:
+- "2 requests, 1 open · Account closure; phone number change · Next: staff approval (Decision owner)"
+- "1 request, 0 open · Saturday opening hours · Next: none (case can close)"
+- "1 request, 1 open · Phone number change · Next: customer to confirm (Customer)"
+
+2) How to compute it:
+- Counts come from data, not the model: requests = the case's customer requests that started a new topic (each SentForReview round counts as a request; a turn that was answered straight through and had a new topic counts as one; follow-up answers, "yes"/"no" confirmations and closing replies do not). Open = requests whose review round is pending or awaiting_confirmation, plus the latest request if the agent is waiting for the customer's answer to it.
+- Next step and who, from the case state: pending review round -> "staff approval (Decision owner)"; awaiting_confirmation -> "customer to confirm (Customer)"; agent asked a question (QuestionType needs_info) -> "customer to reply (Customer)"; closing question asked -> "anything else? (Customer)"; case closed -> "none (closed)".
+- The short summary comes from the SummariseCase agent (already exists): give it the case's customer messages and event titles and ask for a topic list of at most 8 words, semicolon separated, written as topics not quotes ("Account closure; phone number change"). If it fails, fall back to the previous summary part.
+- Keep the existing Summary field (the one or two sentence summary) and refresh it in the same step.
+
+3) Call it from one place: a server action RefreshCaseHeadline(CustomerCaseId), run at the end of RunAgent, RunAgentFollowUp, RecordReviewDecision and CloseCustomerCase (after their other work). It never throws (log with LogMessage on failure).
+
+4) Run it once from BootstrapCustomers for every non-archived case so existing headlines are refreshed.
+
+When done, list every element you added or changed.

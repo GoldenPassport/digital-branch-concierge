@@ -1,0 +1,18 @@
+Send in BranchConciergeAgentV2 (the clone of Branch Concierge Agent). Goal: a skinny agent app that holds only the AI agent, its skills and the mock core-banking data. Case management now lives in Branch Concierge Chatbot App V2. Keep the app valid with zero errors and zero warnings. Do not publish.
+
+KEEP (do not change signatures):
+- The AI agent and its internals: AgentFlow, CallBranchConciergeDemo, BuildMessages, GetGroundingData, StoreMemory, the SummariseCase / ClassifyReply / CheckReply agents and their flows (SummariseTranscript, ClassifyCustomerReplyFlow, ReplyCheckFlow).
+- Skills: Knowledge, OpeningHours, FetchBalance, PrintStatement, FindSlots, BookAppointment, UpdateContactDetails, Authorise.
+- Entities: Customer, Capability, KnowledgeSection, DecisionLog, ConciergeSession, ContactChangeRequest, Appointment, Memory (and their static data).
+- Public service actions for the chatbot: AgentTurn, GetTurnDecisions, SummariseTranscript, ClassifyCustomerReply, CheckAgentReply, LogDecision, UpsertConciergeSession, ClearSessionAgentData, SetContactChangeStatus, ExecuteSkill, GetCustomerContext.
+- BootstrapCustomers and anything the kept elements call.
+
+DELETE (moved to the chatbot):
+- Entities CustomerCase, ReviewCase, ReviewRound, ReviewCaseEvent, CaseEvent, CaseEventKind, ChatMessage, CaseConversation, ConciergeReply, LearningExample, and any "...2" duplicates of them.
+- Case structures (CaseHeader, CaseListItem, CaseSummary, ChatHistoryItem, ReviewCaseSummary, ReviewInboxItem, ReviewRoundSummary, TimelineItem and "...2" duplicates).
+- All case server and service actions (for example SubmitCustomerRequest, SubmitCustomerReply, AcceptCustomerReply, TrackCaseForSession, EnsureCustomerCase, CreateChatMessageRecord, DeliverReply, ListReplies, GetChatHistory, GetCurrentCase, GetCaseDetail, ListCustomerCases, ListCasesForReview, ListReviewCases, ListReviewRounds, GetReviewCaseSummary, GetSessionRouting, RouteForSession, PrepareCustomerWait, CloseCustomerWait, GetReviewTimeout, SecondsUntil, CalculateSlaDueOn, ToUkTime, OpenReviewRound, CloseReviewRound, RecordReviewDecision, RecordReviewOutcome, EscalateReviewCase, AddCustomerFollowUp, AttachFollowUp, CaptureLearning, PromoteLearningExample, SetLearningFlag, ListLearningExamples, ExportLearningAsEvalCases, SetOutcomeReply, GetReviewOutcome, CloseCustomerCase, AutoCloseIdleCases, RefreshCaseHeadline, AddCaseEvent, LogCaseEvent, TriageCustomerReply, ArchiveTestData, ClearEvaluationRun, RepairCaseData, BackfillCaseFields, BackfillCaseFields2, RunAgent, RunAgentFollowUp, RunAgentWithGuidance, RunImpactPolicyGate, ImpactPolicyGate, ApplySlaDecision, TestSlaDueOn).
+- Events CustomerRequestReceived, CustomerReplied, ReviewDecided, ReviewEscalated.
+- Timer AutoCloseIdleCasesHourly and settings used only by deleted logic (CustomerReplyTimeoutMinutes, CaseAutoCloseHours).
+- Then run Remove unused elements.
+
+If deleting something breaks a kept element, keep the smallest piece needed and tell me. When done, list everything deleted and kept, and the error/warning count.

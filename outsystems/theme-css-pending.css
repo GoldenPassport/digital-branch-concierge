@@ -1,0 +1,27 @@
+/* Pending additions to the Chatbot theme (BranchConciergeDemotestapp).
+   Not yet applied: the chatbot is mid-refactor in Studio and cannot publish.
+   Append to the end of the theme stylesheet once the refactor is valid. */
+
+/* Review cases: "Updated" + table total on one line, then search + toggle, then the table.
+   Tested live on 22 Oct 2026 (injected in the browser). */
+.padding-m:has(#ViewButtonGroup) > [id$=TableContainer] { display: contents !important; }
+#UpdatedContainer { grid-column: 1 !important; order: 3 !important; align-self: end; margin-bottom: 4px !important; }
+.padding-m:has(#ViewButtonGroup) .table-summary { grid-column: 2 !important; order: 3 !important; justify-self: end; align-self: end; margin: 0 0 4px !important; }
+#SearchRow { margin-bottom: 8px !important; }
+.padding-m:has(#ViewButtonGroup) > :first-child > :has(#ViewButtonGroup) { margin-bottom: 8px; }
+.padding-m:has(#ViewButtonGroup) table.table { grid-column: 1 / -1; order: 5 !important; }
+.padding-m:has(#ViewButtonGroup) > [id$=TableContainer] > *:not(.table-summary):not(table) { grid-column: 1 / -1; order: 6 !important; }
+
+/* Hero cards: labels take the card's colour instead of grey; Learnings card in near-black.
+   Tested live on 22 Oct 2026. */
+.hero-card *:not(.hero-number) { color: #272b30 !important; font-weight: 500; }
+.hero-card-open *:not(.hero-number) { color: #1f7a3a !important; }
+.hero-card-due *:not(.hero-number) { color: #a35f00 !important; }
+.hero-card-overdue *:not(.hero-number) { color: #b42318 !important; }
+
+/* Case modal conversation flow: our replies blue, customer grey (messages-app style).
+   Not yet tested: check contrast of the timestamp label inside the blue bubble. */
+.case-file-modal .chat-message-agent { background: var(--color-primary, #1868f2) !important; color: #fff !important; }
+.case-file-modal .chat-message-agent * { color: #fff !important; }
+.case-file-modal .chat-message-agent > span:first-child { opacity: .8; }
+.case-file-modal .chat-message-user { background: var(--color-neutral-3, #e9ecef) !important; color: var(--color-neutral-10, #272b30) !important; }

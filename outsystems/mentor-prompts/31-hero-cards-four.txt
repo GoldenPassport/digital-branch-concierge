@@ -1,0 +1,12 @@
+Send in Branch Concierge Chatbot App. ReviewCases screen only; do not edit the theme stylesheet.
+
+The hero cards row (HeroCardsRow) shows only two cards ("SLA due today" and "Learnings"); the "Open cases" card is missing. Make it four cards, in this order, each a container with class "hero-card" plus the extra class shown, holding a large number (Expression, class "hero-number") and a small label under it:
+1) "Open cases" (class "hero-card hero-card-open"): number of CustomerCase rows with Status "open" and not archived.
+2) "SLA due today" (class "hero-card hero-card-due"): pending review rounds (not decided) whose SLA due falls later today, UK time, and is not yet past.
+3) "SLA overdue" (class "hero-card hero-card-overdue"): pending review rounds whose SLA due is already past.
+4) "Learnings" (class "hero-card"): number of LearningExample rows, subtext "<n> promoted".
+Add the missing counts (OpenCases, SlaOverdue) as outputs of the existing GetHeroCounts data action / GetHeroCountsServer action, and remove the "<n> overdue" subtext from the SLA due today card (overdue now has its own card).
+
+Inbox table, SLA due column: show only the date/time; remove the old due-soon/overdue badge from that cell, because the SLA status column now shows it (the two disagreed: "Due soon" vs "On track").
+
+When done, list every element you added or changed.

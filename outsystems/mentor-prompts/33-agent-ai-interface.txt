@@ -1,0 +1,22 @@
+Send in Branch Concierge Agent (the agent app). Add new public service actions only; do not change or delete any existing action, entity or signature yet (the case logic is being moved to the Chatbot app and will call these instead).
+
+Goal: the agent app exposes a small AI-only interface. None of these new actions may read or write the case tables (CustomerCase, ReviewCase, ReviewRound, ReviewCaseEvent, CaseEvent, ChatMessage, CaseConversation, ConciergeReply, LearningExample). They may use the AI agent, the skills, Customer, ConciergeSession, Capability, KnowledgeSection, Memory and DecisionLog.
+
+1) AgentTurn(SessionId Text, CustomerId Text, Message Text, Guidance Text, History Text, LearningExamples Text) -> Reply Text, QuestionType Text, AwaitingCustomer Boolean, Reasons Text, TurnStartUtc DateTime, RawResponse Text.
+   Does what RunAgent does today for the AI part only: ensure the ConciergeSession for SessionId/CustomerId, record TurnStartUtc, build the messages (grounding, memory, the History and LearningExamples passed in, the Guidance when not empty), call the AgentFlow / CallBranchConciergeDemo agent with its skills, parse the reply (first "{" to last "}") and return it. No case writes, no ConciergeReply, no ChatMessage.
+
+2) GetTurnDecisions(SessionId Text, SinceUtc DateTime) -> Decisions (list of a new structure TurnDecision: Capability, Risk, Step, Outcome, Reason, CreatedOn) from DecisionLog for that session since SinceUtc, oldest first. Read only.
+
+3) SummariseTranscript(Transcript Text) -> Topics Text (max 8 words, semicolon separated), Summary Text (1-2 sentences). Wraps the SummariseCase agent. No case writes.
+
+4) ClassifyCustomerReply(Text Text) -> Intent Text, Confidence Decimal. Wraps the ClassifyReply agent.
+
+5) CheckAgentReply(Reply Text) -> QuestionType Text, Flags Text. Wraps the CheckReply agent.
+
+6) ExecuteSkill(SessionId Text, CustomerId Text, Capability Text, ParametersJson Text) -> Success Boolean, Reference Text, Message Text. Runs one skill directly (e.g. update_contact_details with the new phone number) for the confirm-then-execute step, writing its DecisionLog row as the skill does today. No case writes.
+
+7) GetCustomerContext(CustomerId Text) -> Name, Segment, VulnerabilityFlag, OpenComplaint, Phone, Email (read only, from Customer).
+
+All seven never throw: on failure they log with LogMessage and return empty outputs plus Success/QuestionType "error" where it makes sense. Publish when valid.
+
+When done, list every element you added.

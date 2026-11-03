@@ -1,0 +1,23 @@
+PART A - send in Branch Concierge Agent (the agent app). Do not change the main agent, the gate or the workflow actions' signatures.
+
+1) Case summariser. Add an agent SummariseCase (same AI model as CallAgent, Text output, no actions). Input: the case transcript (customer and agent messages plus event titles, oldest first). Its system prompt asks for JSON only: {"headline": "...", "summary": "..."}, where headline is the case reason in at most 8 words written as a topic, not a quote (e.g. "Saturday opening hours", "Phone number change", "Account balance enquiry") and summary is one or two sentences: what the customer wanted, what was done, how it ended. Strip ```json fences, deserialize into a structure, and if parsing fails keep the existing values and log with LogMessage. Wrap it in a server action SummariseCustomerCase(CustomerCaseId) that builds the transcript from ChatMessage (by CaseId) and CaseEvent, calls the agent and updates Headline and Summary.
+
+2) Call SummariseCustomerCase from CloseCustomerCase, so every closed case ends with a headline and summary of the whole conversation.
+
+3) Old data, in BackfillCaseFields (keep it called from BootstrapCustomers; it must be safe to run again):
+- Tag untagged messages: for ChatMessage rows with CaseId 0 or null, set CaseId to the case of the same SessionId whose CreatedOn is the latest one not after the message's CreatedOn.
+- Stray cases: a case whose only customer message is a short closing reply (it starts with "no", "no thanks", "that's all", "that's everything", "thanks", case-insensitive, under 40 characters) and which was created within 10 minutes after another case of the same session: move its messages to that earlier case, then set its Status to "merged" (exclude "merged" from ListCustomerCases and ListCasesForReview).
+- Stale open cases: handled by the auto-close in 4).
+- Then run SummariseCustomerCase for every case whose Summary is empty or whose Headline equals its first customer message.
+
+4) Case auto-close timeout. Add a setting CaseAutoCloseHours (Integer, default 24). Add a server action AutoCloseIdleCases: every open case with no pending ReviewCase and no ChatMessage or CaseEvent newer than CaseAutoCloseHours is closed with CloseCustomerCase, Outcome "timed_out", Actor "Workflow", Title "Case closed after <n> hours without activity". Run it from a Timer every hour and once at the end of BackfillCaseFields. (The workflow's 30-minute customer wait still closes the case when it ends; this timer is the safety net for anything left open.)
+
+PART B - send in Branch Concierge Chatbot App (refresh the Branch Concierge Agent dependency first). Chat screen only.
+
+1) "Your cases" rows: remove the empty space under the case number line (no fixed heights or extra margins; line 1, line 2 and line 3 sit directly under each other with small spacing). Line 1: CaseNumber in bold and the status badge on the right. Line 2: Headline. Line 3 (small muted text): "Closed Mon 19 Oct 15:22" when the case is closed, otherwise "Opened Mon 19 Oct 15:21"; never both. Make the whole row clickable: put the row content inside a Link (or use the container's OnClick) that calls the existing action that opens the popup, and remove the empty stretched link.
+
+2) Status badge on every row, in the current case header and in the popup header: the current badge has no visible colours in this theme. Use the OutSystems UI Tag pattern (or explicit background and text colours): Open = green background, white text; Waiting for staff = amber background, dark text; Closed = grey background, dark text; Merged is not listed.
+
+3) Case popup: it opens empty (title shows only "·", no timeline). Make the popup call GetCaseDetail with the clicked row's CustomerCaseId every time it opens, wait for the result, and bind the title, header and Timeline list to that result, with a small loading indicator while it fetches.
+
+4) Remove the old "Earlier messages" header rows and the stray "opened <date>" label at the end of the conversation; the case header at the top replaces them.

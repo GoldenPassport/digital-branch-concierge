@@ -1,0 +1,16 @@
+Send in Branch Concierge Chatbot App, after prompt 14. First add the public element ListCasesForReview (Manage dependencies). RecordReviewDecision, the edit-reply, learning and history features stay as they are; they move to the detail screen. Add, do not replace.
+
+ReviewCases becomes a case list; a new CaseDetail screen holds the full case.
+
+1) ReviewCases, Inbox tab: a slim table from ListCasesForReview("inbox"), at most these columns: Case (CaseNumber, link), Raised (RaisedOn in UK time), Customer (id and name), Headline, SLA ("4 working hours" plus act-by time in UK time, green / amber / red overdue as today), Action needed (CurrentAction, with an "Escalated" tag when set). Keep the search box and the "Updated hh:mm:ss" auto refresh. Clicking a row or the case link goes to CaseDetail with the CustomerCaseId and ReviewCaseId.
+
+2) ReviewCases, Decided tab: same slim style from ListCasesForReview("decided"): Case, Raised, Customer, Headline, Decision (Approved green / Rejected red tag), Decided by, Decided on (UK time), SLA Met / Missed. Click goes to CaseDetail. Keep the Learnings tab as it is.
+
+3) New screen CaseDetail (DecisionOwner role, inputs CustomerCaseId and ReviewCaseId optional), with a "Back to cases" link:
+- Header: CaseNumber, Headline, status tag, customer id and name, opened and closed dates, Outcome.
+- Summary card: Summary, and for the selected review round: Kind, reasons, SLA and act-by with the colour rule, escalated marker, process instance id.
+- Decision panel, only when the selected review round is pending: the proposed reply (editable, as the Edit feature today), Note, learning checkbox, and Approve / Reject buttons calling RecordReviewDecision as today; after a decision show the returned Message, refresh the page and keep the user on CaseDetail.
+- Decided rounds: decision, decided by, decided on, note, reply the customer received.
+- Timeline: the whole case from GetCaseDetail's Timeline, oldest first, using the OutSystems UI Timeline Item pattern: customer messages, agent replies (with route and reasons in muted text), and event rows (sent for review, decision, escalated, waiting, timed out, closed) with actor and UK time.
+
+Publish when done and list every element you added or changed.

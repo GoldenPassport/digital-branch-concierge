@@ -1,0 +1,13 @@
+Send in Branch Concierge Chatbot App. Case modal (CaseFileModal block) and badges only; do not change the agent calls, polling or the decision logic.
+
+1) Modal title bar: show the case number and the status badge (e.g. "CASE-0040  [Open]") instead of the plain word "Case", left aligned, with the close button on the right. The headline sits on a second line under them, one line, truncated with an ellipsis. Same on every screen that opens the modal.
+
+2) OpenSection must be applied every time the modal opens: the chat header's "Event log" link opens it with Overview, Review & approvals and Conversation flow collapsed and Event log expanded. Today it opens with Overview expanded and Event log collapsed.
+
+3) On ReviewCases the page refreshes every few seconds; while the modal is open, that refresh must not reload the modal or reset its expanded/collapsed sections or anything the reviewer has typed (proposed reply, note). Refresh the modal only when it opens and after a decision.
+
+4) Badges, everywhere (header, "Your cases", modal, Review cases tables): use white or very light text on the coloured badge background so it reads well (Open green, Waiting for staff amber, Closed grey, Approved green, Rejected red). Make the "Met" / "Missed" / "overdue" SLA values badges too (Met green, Missed red, overdue red, due soon amber), in the modal's review rounds and in the Review cases tables.
+
+5) Event log rows show "Customer Customer C1003" in the By column: show "Customer C1003" once.
+
+When done, list every element you added or changed.
