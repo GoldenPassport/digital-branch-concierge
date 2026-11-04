@@ -1,0 +1,13 @@
+Send in Branch Concierge Chatbot App V2. Do not publish. Change nothing unrelated, and do not change the workflow or the agent. Do not rename existing elements. Keep zero errors and warnings. Four fixes.
+
+1) CaseFileModal refresh disrupts the decision form. RefreshData runs every 6 seconds and rebuilds the decision panel, so the note box loses focus while typing and the Approve and Reject buttons are replaced, so clicks can miss. While a decision panel is open and undecided, do not run the timer refresh at all. Start the timer only after a decision has been made in this modal, or when the modal has no decision panel. Later ticks must not recreate the widgets of anything being edited.
+
+2) Chat with no open case. When a customer has no open case (all closed, or none) and no case has been selected with Open, show the clean "How can I help you?" empty state, not messages from closed cases: no old messages, an empty header, and the message bar available for a new case. The old cases stay under "Your cases" and Open loads each one read-only as now. Sending a message starts a new case as usual, and that message and its replies show. Today the MsgFilterIf condition shows every message when there is no current case: change that, keeping live entries sent in this session visible. Also make sure that when the current case closes while the customer is watching (for example timeout), they still see that case's closing message, read-only or until they reload or send a new message, rather than a blank screen straight away.
+
+3) Approval reply wording. After approval the customer gets: "Your request has been approved. Would you like me to go ahead and carry out the change? (Thanks - I've submitted the change of your phone number to +44 7700 900111. It's waiting for approval by a member of sta)". Find what appends the bracketed, cut-off draft (likely RunAgentFollowUp). Remove the bracketed text. The reply must not say it is still awaiting approval. Keep the confirm-then-execute behaviour, and name the change in plain words if available, for example "Your request to change your phone number to +44 7700 900111 has been approved. Would you like me to go ahead and make the change?" Do not truncate replies.
+
+4) ReviewCases hero card: remove the "<n> promoted" subtext from the Learnings card. Keep the count. Leave the "0 promoted" in the Learnings table summary line.
+
+Also check why the "Waiting for the concierge..." indicator did not show right after sending on the Chat screen in a recent test, while IsWaitingForFirstReply should be true, and fix it if it's a bug.
+
+List the cause of each and exactly what you changed.

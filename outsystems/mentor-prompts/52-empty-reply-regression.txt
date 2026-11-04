@@ -1,0 +1,15 @@
+Send in Branch Concierge Chatbot App V2. Your last change caused a regression. Read the logic and tell me the actual cause first, quoting the action and node. Do not guess. Do not publish. Do not change the workflow or public service action signatures. Keep zero errors and warnings.
+
+Revision 17 at 12:19: normal questions were answered.
+Revision 18, published 13:00, with your prompt 51 changes:
+- CASE-0078, C1003, "What time do you close on Saturday?": route review, reasons "empty reply".
+- CASE-0079, C1002, "What time do you open on Monday?": route review, reasons "vulnerability flag on record;empty reply".
+At that point both learning rows were demoted, so BuildLearningExamplesText should return empty text. No error appears in the runtime logs so far.
+
+Check, in this order:
+a) In RunAgent, whether the new BuildLearningExamples node is wired so that AgentFlow is still reached and its Reply is still assigned. Check the same in RunAgentFollowUp, RunAgentWithGuidance and AnswerHeldFollowUps.
+b) Whether an If or exception path around the new node skips AgentFlow, or a variable was overwritten, for example the local that holds Reply, TurnStartUtc or the customer's Message.
+c) Whether the new action's DecisionLog write, or an empty LearningExamples value, reaches AgentTurn in a form that breaks it. Remember the empty-reply-with-guardrail check you added in RunAgent. Check it doesn't treat the new learnings_used row as a guardrail or refused row, and that the gate's rows and GetOtherSkillRows ignore that row.
+
+Fix the cause. A turn with no learnings must behave exactly as it did in Revision 17. Then list what you changed.
+Also: the learnings_used row must not count as a skill row, must not affect MaxRisk, and must not block the confirmed-action exemption. Confirm that in the logic, and filter it out if needed.

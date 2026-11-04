@@ -1,0 +1,22 @@
+Send in Branch Concierge Chatbot App V2. The correction test now passes on CASE-0071: daniel.first superseded, daniel.second held, approved, confirmed and applied. Thanks. Three more items. Do not publish. Do not rename elements, change public service action signatures or change the workflow. Keep zero errors and warnings. List what you changed after each item.
+
+1) Link the review case to its request directly.
+You reported that a yes picks the request by text and timing: GetApprovedAction takes the oldest approved review case, and GetPendingChangeX takes the oldest pending request whose value appears in the text and was created near the decision. That is too weak for an audit trail, and oldest-first is wrong when several are open.
+Required:
+- When the gate opens a review case for a contact change, store that request's Reference on the review case, in a new attribute such as ChangeReference.
+- A yes, a no, a rejection and a supersede all use that Reference directly and never match on text or time.
+- If several approved review cases are waiting, use the one the customer was most recently asked to confirm, newest first.
+- If the Reference is empty, as on old cases, do nothing and use the existing "nothing has been changed" reply.
+- Tell me how you checked that an older pending request with the same value cannot be picked.
+
+2) Headline says "0 open" on a held case.
+Seen on CASE-0071 straight after the first hold: "0 open · Email address change request" with the "With us" badge, in Chat and in the case modal. It only showed "1 open" after a later turn. My reading, which you must check: RefreshCaseHeadline runs before the gate creates the review case. Refresh it after the review case is created, so the count and the badge agree. Do the same after a decision and after the change is applied.
+
+3) Overview on a corrected case.
+With the second approval pending, CASE-0071 said "The request has been approved and is awaiting customer confirmation". The first was superseded and the second was still pending. Pass each review round's link to its request and its current state so the summary can't merge them. In Review & approvals, show a superseded round as "Superseded", not "Approved".
+
+Report only, change nothing: item 2 from before, the question asked during a hold that never gets answered.
+- The customer is told "A member of staff is looking at it and will reply here".
+- Give me the smallest design that answers these low-risk follow-ups once the decision is made, through the agent and with the gate on that turn.
+- Name the exact workflow node, inputs and outputs if the workflow must change. I will do that by hand.
+- Also say what a plain "Yes" sent during a hold should do. It currently gets "I've added that to your request", which reads badly.

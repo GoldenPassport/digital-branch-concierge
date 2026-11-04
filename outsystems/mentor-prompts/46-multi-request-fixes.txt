@@ -1,0 +1,33 @@
+Send in Branch Concierge Chatbot App V2. Bugs from the multi-request test on CASE-0070, customer C1004. For each one, read the logic and tell me the actual cause first, quoting the action and node. Do not guess. Do not publish. Do not rename elements, change public service action signatures or change the workflow; if a fix needs a workflow change, tell me the exact node and input. Keep zero errors and warnings. Finish item 1 first, and list what you changed after each item, in case you hit your usage limit.
+
+1) Most important: the gate exempts a change the decision owner never approved.
+- Owner approved email change to daniel.new@example.com (CCR-AJJE). The customer was asked to confirm.
+- Customer: "Actually, please use daniel.other@example.com instead."
+- UpdateContactDetails logged CCR-HAJE for the new address, but no review case was opened. Route straight_through, reasons "pre-approved by Luke Audie". The Inbox is empty, yet the customer is told a member of staff will approve it.
+- Customer then said "Yes". Reply: "Of course, what would you like help with today?" Customer.Email is unchanged. CCR-AJJE and CCR-HAJE are both still pending.
+Check RunImpactPolicyGate, PreApprovedMatch? and GetPreApprovedCase. My reading, which you must check: the exemption matches on the skill and not on the field and value.
+Required:
+- The exemption applies only if the field and value of this turn's request exactly match the approved request.
+- A different value opens a new approval as normal.
+- The earlier approved request that is replaced is set to "superseded", and its review case no longer waits for confirmation.
+- After a correction, "yes" must not apply anything until the new request has been approved. Add a test note saying how you checked this.
+
+2) A question sent during a hold is dropped.
+- While the review was pending, the customer asked "what time do you close on Saturday?" and was told "I've added that to your request. A member of staff is looking at it and will reply here."
+- It is never answered: not in the approval reply and not after the change is done.
+Required: when the case returns to the customer, answer follow-ups logged during the hold, through the agent as a normal low-risk turn, and run the gate on that turn. Do not put this in the deterministic "Done" reply. Also show those follow-ups clearly to the decision owner in the case modal.
+
+3) Overview makes false statements.
+- While an approval was pending: "The case progressed with no pending reviews".
+- After item 1: "the email change was approved and carried out", though nothing was applied.
+Required: pass the summary the actual state of each ContactChangeRequest on this case (pending, applied, cancelled, rejected, superseded) and each review round. It may only say something was carried out if the request is applied.
+
+4) Headline counts are wrong: "1 request, 0 open" with two requests and one pending approval. Tell me how the counts are worked out. They must come from data, not the model: requests = review rounds plus straight-through requests if that can be determined, otherwise drop the count. Open means waiting on staff or on the customer's confirmation.
+
+5) "Next: anything else?" shows on held cases, where it is wrong. Remove "Next: ..." from the headline altogether. The badge already shows who has the case.
+
+6) The customer's "no" path shows reasons "pre-approved by ... and confirmed by the customer". Change it to "approved by ..., declined by the customer".
+
+7) Decided table: delete the Decided by column properly (header and cell). It is currently only hidden in the theme with #DecidedTable th:nth-child(8), td:nth-child(8) { display: none }. Then fix the theme so that nth-child(8) is Decided on at 11% and nth-child(9) is SLA status at 9%, and remove the rules for nth-child(10). Keep Decided by in the case modal.
+
+Also report only, change nothing: how RunAgent picks which ContactChangeRequest to apply on a yes. You hit your limit before reporting on this.

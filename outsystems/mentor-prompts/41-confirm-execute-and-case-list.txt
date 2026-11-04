@@ -1,0 +1,24 @@
+Send in Branch Concierge Chatbot App V2. Three bugs found in testing. For each one, read the logic and tell me the actual cause before you change anything, quoting the action and node. Do not guess. Do not publish. Do not rename elements or change public service action signatures. Do not change the workflow; if a fix needs a workflow mapping, tell me exactly which node and input and I will do it by hand. Do not touch the table columns you just changed.
+
+1) Customer's yes after an approval does nothing (most important).
+Seen on CASE-0034, customer C1003:
+- Customer: please change my phone number to +44 7700 900222. Held, review case created.
+- Decision owner approves.
+- Reply delivered: "Your request to change your phone number to +44 7700 900222 has been approved. Would you like me to go ahead and make the change?"
+- Customer: "Yes please". CustomerReplied fires, the workflow goes TriageCustomerReply, then RunAgent.
+- Agent replies: "Happy to help, Chloe, I'm just not sure what you'd like me to do..." with route straight_through. The phone number is not changed.
+So the agent turn has lost the context of what was approved. Check, in this order:
+a) What RunAgent passes to AgentTurn on that turn. Is the conversation history for this session built and passed? Does it include the approval reply?
+b) Whether RunAgent or AgentTurn knows the case has an approved review case whose action has not been executed yet.
+c) Where ExecuteSkill is meant to be called in the confirm flow, and why it was not reached. Check whether it depends on Conversation.LastQuestionType or QuestionType = "confirm". The workflow does not currently map PrepareCustomerWait.LastQuestionType or DeliverReply.QuestionType, so that value may be empty.
+Required behaviour: when a case has an approved, unexecuted action and the customer says yes, run that approved action through ExecuteSkill exactly once, with the values that were approved, then tell the customer it is done, and record it on the case. If the customer says no, make no change and say so. Anything else goes to the agent as normal, with the history. This decision must not depend on the model remembering the approval.
+
+2) "Your cases" list goes stale.
+The list did not show CASE-0034 while that case was open in the chat. Tell me when the list is loaded. It must reload when a new case starts and when a case's status or badge changes, without moving the question box focus and without switching the selected case.
+
+3) Overview goes stale after a decision.
+After approval the case overview still says the request "remains pending approval", even after a page refresh. Tell me when the summary is regenerated. It must be refreshed after a review decision and after the approved action runs.
+
+Also report only, change nothing: how the case number is generated. Cases went from CASE-0006 straight to CASE-0034 on a fresh install with no deletes that I know of.
+
+When done, list every element you changed, and keep zero errors and warnings.

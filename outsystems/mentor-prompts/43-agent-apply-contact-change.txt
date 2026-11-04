@@ -1,0 +1,23 @@
+Send in BranchConciergeAgentV2. An approved contact change is never applied, and the customer is told it was. Read the logic and tell me the actual cause first, quoting the action and node. Do not guess. Do not publish. Do not change the signature of any existing public action. Keep zero errors and warnings. Keep this app free of case management.
+
+Evidence, read from the tables after a test on Chatbot App V2:
+- C1004 asked to change phone to +44 7700 900444. The decision owner approved, the customer said yes, and the chatbot replied "Done. I have changed your phone number".
+- Customer C1004 Phone is still +44 7700 900104. C1003 is also still its original number after earlier approvals.
+- ContactChangeRequest has two rows for that one request, Id 37 (CCR-DIJD) and Id 38 (CCR-GJJD), same customer, field and value, both Status = pending. Every row in the table is still pending.
+My reading, which you must check: the update_contact_details skill only logs a pending request. When the chatbot calls ExecuteSkill after approval, it runs that same logic again, so it adds a second pending row and never updates Customer.
+
+Please report:
+a) What ExecuteSkill does for update_contact_details, node by node.
+b) What UpdateContactDetails does, and whether any action in this app ever writes Customer.Phone or Customer.Email.
+c) What SetContactChangeStatus does and which values it accepts.
+
+Then make this change:
+- Add one new public service action, ApplyContactChange. Inputs: CustomerId, Reference. Outputs: Success (Boolean), Field, NewValue, Message (Text).
+- It finds the pending ContactChangeRequest for that CustomerId and Reference, updates the matching Customer attribute (phone or email), sets the request Status to "applied", and writes a DecisionLog row for audit. Everything happens in one transaction.
+- If no pending row matches, it changes nothing and returns Success = False with a clear Message. A second call for the same Reference must therefore not change anything.
+- It has no model call.
+- The agent must not be able to call it. It is not a tool or skill of the AI agent; only the chatbot's confirmed flow will call it.
+
+Do not change what the AI agent's own update_contact_details tool does. It must still only log a pending request.
+
+When done, list every element you changed and anything else that writes to Customer.

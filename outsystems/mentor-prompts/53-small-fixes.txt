@@ -1,0 +1,15 @@
+Send in Branch Concierge Chatbot App V2. Small fixes from the learnings test. Read the logic first. Do not publish. Do not change public service action signatures or the workflow. Keep zero errors and warnings. List what you changed after each item.
+
+1) A failed model call looks like a normal hold. With an empty DeepSeek balance, AgentTurn returned an empty reply and empty RawResponse, every question went to review with reason "empty reply", and the runtime logs showed no failure. Tell me whether AgentTurn's handler can tell the chatbot the model call failed (I will send any agent change separately). Keep routing to review, but make the reason "agent unavailable" when the model failed, and show that to the decision owner in the case modal.
+
+2) Learnings tab: the Guidance box clears when promotion is refused. Keep what was typed.
+
+3) Learnings tab: straight after promoting, the line above the table still said "0 promoted" until the page reloaded. Refresh it after Promote and Demote.
+
+4) Review Cases: the first click on Decided or Learnings after a page load often does nothing, and a second click works. Find out why (possibly the list reloading after load) and fix it.
+
+5) Hero card "Open cases" showed 3 while the Inbox was empty, because it counts open cases with the customer. Tell me exactly what it counts. Do not change it yet.
+
+6) Remove the temporary agent_empty_reply diagnostic only if item 1 replaces it. Otherwise keep it.
+
+Also report only: how a freshly flagged row behaves. Ticking Flag for learning should create a row with Promoted = False that is not passed to the agent.

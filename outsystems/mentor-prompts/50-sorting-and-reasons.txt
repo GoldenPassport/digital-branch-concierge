@@ -1,0 +1,11 @@
+Send in Branch Concierge Chatbot App V2, after prompt 49 is reviewed. Read the logic and give the cause first, quoting the action and node. Do not publish. Do not change public service action signatures or the workflow. Keep zero errors and warnings. List what you changed after each item.
+
+1) Sorting does nothing on the review tables.
+On Decided, clicking Case or Raised highlights the header, but the row order never changes. Default order is not by date either: CASE-0002, 0006, 0035, 0036, 0035, 0034, 0067, 0068, 0069, 0004, 0005, 0070...
+Required: every sortable header on Inbox, Decided and Learnings sorts in the database, with one click ascending and a second descending, and the right arrow showing. Sort Case and the dates by real value, not as text. Default: Inbox by SLA due ascending, Decided by Decided on descending, Learnings by Raised descending. Use screen aggregates or the existing list actions as you find best, and keep search and paging working.
+
+2) "Done" reasons went blank.
+On CASE-0074, with a follow-up answered after the change, the Done reply showed route straight_through with empty Reasons. On CASE-0072, with no follow-up, it showed "approved by Luke Audie, confirmed by the customer". Tell me why, and whether the DecisionLog row and audit event for the confirmed action were still written. Keep the reason on the Done reply when a follow-up runs.
+
+3) Report only: learning flags.
+Ticking Flag for learning on CASE-0074 created a Learnings row with Promoted = Yes and blank Guidance, and there is no promote step on screen. Tell me whether flag and promote were meant to be separate, what the row is used for afterwards, and where it feeds the agent, if anywhere.

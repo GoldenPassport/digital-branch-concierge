@@ -1,0 +1,19 @@
+Send in Branch Concierge Chatbot App V2. Your last fix works up to the customer's yes, but the gate then holds the approved action a second time. Read the logic and tell me the actual cause first, quoting the action and node. Do not guess. Do not publish. Do not rename elements or change public service action signatures. Do not change the workflow; if a fix needs a workflow change, tell me the exact node and input and I will do it by hand.
+
+Seen on CASE-0035, Revision 8:
+- Approve, then the customer gets "Would you like me to go ahead and make the change?"
+- Customer: "Yes please".
+- Overview now says: "The change was approved, carried out, and confirmed with the customer."
+- But the customer's reply is "Thank you. A member of staff will review this and come back to you shortly.", route review, reasons skill risk medium. The "Done. I have changed your ..." reply is never shown.
+- Review & approvals now has a second Approval, Pending, under the first one, which is Approved. The case is back in the Inbox, with Raised changed to 19:23, and the badge is "With us".
+
+My reading, which you must check: after RunAgent, the workflow calls RunImpactPolicyGate. It reads this turn's decisions with GetTurnDecisions, finds the update_contact_details row written by ExecuteApprovedSkill, sees risk medium and holds it.
+
+Required behaviour:
+- An execution of an action that the decision owner already approved must not open a new approval. The gate treats that turn as straight through, so the customer sees the "Done" reply, route straight_through or a clearer route name if one exists, and the badge goes to "With customer".
+- This exemption applies only when the skill and values match the approved review case on the same case and it has just been executed. A different skill, or a different value, in the same turn must still be held.
+- The customer's "no" path must also come through as straight through with the "I have not made any change" reply. Check this path too.
+- No second review round, no change to Raised on the review case, no SLA change.
+- The gate stays deterministic with no model call, and every execution is still written to DecisionLog for audit.
+
+When done, list every element you changed, and keep zero errors and warnings.

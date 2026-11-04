@@ -1,0 +1,10 @@
+Send in Branch Concierge Chatbot App V2. Do not publish. Change nothing else on the screen. Do not change the workflow or the agent. Keep zero errors and warnings. Do not rename existing elements.
+
+On ReviewCases, give InboxTable, DecidedTable and ExamplesTable (Learnings) the same first six columns in the same order: Case, Raised, Customer ID, Customer name, Headline, Kind. Every row must have exactly one data cell per header. Then:
+- Inbox: then SLA due, SLA status (unchanged).
+- Decided: then Decision, Decided by, Decided on, SLA status. Rename the "SLA" header to "SLA status". It shows Met or Missed, as now.
+- Learnings: then Decision, Guidance, Promoted (with the Promote link in its cell as now). Remove Created, Request and Agent draft from the table; Raised replaces Created. Agent draft and Request stay available in the case modal.
+
+Learnings has ReviewCaseId, so join ReviewCase and CustomerCase for Case, Raised, Headline, Kind and Customer ID, and show the customer name the same way the other two tables do. Clicking the Case link in Learnings opens the case modal, like the other tables. Use the same widths for the six shared columns across all three tables so they line up when switching tabs. Keep the sort headers working the same way as now for all columns. Keep the existing search on all three tables.
+
+List exactly what you changed.

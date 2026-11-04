@@ -1,0 +1,12 @@
+Send in Branch Concierge Chatbot App V2. Do not publish. Keep zero errors and warnings. Do not change any logic other than what is described here.
+
+In the case modal (CaseFileModal), the decision buttons give no feedback after a click, so it looks as if nothing happened.
+
+When the decision owner clicks Approve or Reject, or any other decision button in that panel, such as send back:
+- The clicked button shows a spinner straight away and keeps its size, so the layout does not jump. Use the OutSystems UI ButtonLoading pattern if it fits; otherwise use the platform's standard spinner.
+- All decision buttons, the Proposed reply, the Note and Flag for learning are disabled until the action finishes, so a decision can't be sent twice or edited while it is saving.
+- When the action finishes, the existing behaviour carries on: the "Decision recorded: ..." banner shows and the panel updates.
+- If the action fails, the spinner stops, the buttons and fields are enabled again, what was typed stays, and an error message shows. The spinner must never stay on.
+- The 6-second modal refresh must not clear the spinner or rebuild the form while the action is running.
+
+When done, list every element you changed.

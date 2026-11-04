@@ -1,0 +1,11 @@
+Send in Branch Concierge Chatbot App V2. Do not publish. Change nothing unrelated. Do not change the workflow or the agent.
+
+After a decision in CaseFileModal, the modal stays stale. Evidence on CASE-0002: it was approved at 13:57 and the workflow delivered the agent's follow-up, but with the modal still open the Conversation flow shows only the holding reply and the Overview still says the request "remains pending".
+
+1) Banner: instead of only "Decision recorded.", say which decision, for example "Decision recorded: Approved." Use the decision's real outcome: approved, rejected, sent back, taken over and so on.
+
+2) While the modal is open, refresh its case data (conversation, event log, status, state badge) on a short timer, using the same data actions it already loads with, so a reply the workflow delivers after the decision appears without closing the modal. Stop the timer when the modal closes.
+
+3) Overview: make sure the case summary is regenerated after the outcome reply has been delivered, not just straight after the decision, so it no longer says "pending" once decided. Use the existing RefreshCaseHeadline logic. If it runs before the follow-up exists, also run it from the server step that stores outcome replies. It must not fail or delay the reply if the summary call fails.
+
+List the cause and exactly what you changed.

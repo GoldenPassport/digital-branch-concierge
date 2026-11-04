@@ -1,0 +1,20 @@
+Send in Branch Concierge Chatbot App V2. Chat screen changes, four items. Do not change the workflow, the agent, public service action signatures or ReviewCases tables. Do not publish. Work through them in order.
+
+1) Live customer bubble shows extra text. OnSendMessage's second ListAppend to Conversation_UI.ChatHistory uses MessageContent_UI, which has "CustomerId: C1002" added. The bubble must show only what the customer typed (MessageIn.Content). Keep sending the same data to the server.
+
+2) Race that loses the customer's message. CustomerInput OnChange runs LoadChatHistory, which clears Conversation_UI and Conversation and rebuilds them from a server call. If the customer sends while that call is in flight, the late empty response wipes the new bubble. Fix it so an in-flight LoadChatHistory can't remove a message sent after it started: for example, disable the question box until the load finishes, or keep live entries (CaseId = -1) when it rebuilds.
+
+3) "Your cases" list: add a small "Open" button on each case row. It loads that case into the header and conversation area, reusing the existing ViewCase and LoadChatHistory actions where they fit.
+- Only the selected case's messages show.
+- If the selected case is not open (Status is not "open"), hide the whole question input bar, so the case is read-only.
+- If it is open, show the bar. A message then continues that case in its own session, not a new one.
+- PollReplies and RefreshCurrentCase must not switch the view back or add another case's replies while an older case is selected. New replies for the selected case must still appear.
+- Keep the behaviour unchanged for a customer with no cases.
+
+4) Case state badge. Stop showing the "(Customer)" suffix after "Next: ..." in the headline, and show a badge instead:
+- "With us", blue, when the case has a pending ReviewCase (Status pending) or the workflow is otherwise waiting on staff.
+- "With customer", grey, when the case is open and nothing is pending for staff.
+- No badge when the case is closed.
+Work this out from the case's data, never from the headline text. Show it in the Chat header, on the "Your cases" rows and in the CaseFileModal header. Use server-side logic or aggregates, not the agent. Elsewhere, such as the Inbox and Decided tables, just drop the suffix so the text is clean; new headlines must not contain it either.
+
+When done, list every element you changed and anything you could not do. Keep zero errors and warnings. Do not rename existing elements.

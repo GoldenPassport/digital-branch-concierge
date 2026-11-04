@@ -12,16 +12,85 @@
 .padding-m:has(#ViewButtonGroup) table.table { grid-column: 1 / -1; order: 5 !important; }
 .padding-m:has(#ViewButtonGroup) > [id$=TableContainer] > *:not(.table-summary):not(table) { grid-column: 1 / -1; order: 6 !important; }
 
-/* Hero cards: labels take the card's colour instead of grey; Learnings card in near-black.
-   Tested live on 22 Oct 2026. */
+/* Hero cards: labels take a dark shade of the card's colour; Learnings card in near-black. */
 .hero-card *:not(.hero-number) { color: #272b30 !important; font-weight: 500; }
-.hero-card-open *:not(.hero-number) { color: #1f7a3a !important; }
-.hero-card-due *:not(.hero-number) { color: #a35f00 !important; }
-.hero-card-overdue *:not(.hero-number) { color: #b42318 !important; }
+.hero-card-open *:not(.hero-number) { color: #14532d !important; }
+.hero-card-due *:not(.hero-number) { color: #7a4300 !important; }
+.hero-card-overdue *:not(.hero-number) { color: #8f1d14 !important; }
 
-/* Case modal conversation flow: our replies blue, customer grey (messages-app style).
-   Not yet tested: check contrast of the timestamp label inside the blue bubble. */
-.case-file-modal .chat-message-agent { background: var(--color-primary, #1868f2) !important; color: #fff !important; }
-.case-file-modal .chat-message-agent * { color: #fff !important; }
-.case-file-modal .chat-message-agent > span:first-child { opacity: .8; }
-.case-file-modal .chat-message-user { background: var(--color-neutral-3, #e9ecef) !important; color: var(--color-neutral-10, #272b30) !important; }
+/* Chat box: send button vertically centred however tall the box is. */
+.input-question .input-with-icon-content-icon .btn { top: 50% !important; bottom: auto !important; transform: translateY(-50%); }
+
+/* Case modal conversation flow: our replies blue, customer grey. */
+[id$=ModalConvList] .chat-message-agent { background: #1868f2 !important; color: #fff !important; }
+[id$=ModalConvList] .chat-message-agent * { color: #fff !important; }
+[id$=ModalConvList] .chat-message-agent > span:first-child { opacity: .85; }
+[id$=ModalConvList] .chat-message-user { background: #e9ecef !important; color: #272b30 !important; }
+[id$=ModalConvList] .chat-message-user > span:first-child { color: #5c636a !important; }
+
+/* Chat header summary: three lines before truncating. */
+#HdrHeadline { -webkit-line-clamp: 3 !important; line-clamp: 3 !important; max-height: none !important; }
+
+/* Review tables: empty state matches the Learnings table. */
+.table-empty { background: transparent; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 4px 4px; text-align: center !important; margin-top: -1px; padding: 64px 16px !important; color: #6a7178 !important; }
+.table-empty * { text-align: center !important; }
+
+/* Review tables: Customer ID wide enough for its header and sort icon. */
+#InboxTable th:nth-child(3), #InboxTable td:nth-child(3), #DecidedTable th:nth-child(3), #DecidedTable td:nth-child(3) { width: 150px !important; min-width: 150px !important; }
+
+/* Your cases: Open button on the date line so the row keeps its full width. */
+[id$=CaseRowWrap] { position: relative; }
+[id$=CaseRowWrap] .case-row-link { width: 100%; }
+[id$=OpenCaseBtn] { position: absolute; right: 10px; bottom: 6px; margin: 0 !important; height: 24px; min-height: 24px; padding: 0 10px; font-size: 12px; z-index: 1; }
+.case-row-line1 > * { white-space: nowrap; }
+
+/* Chat header: state badge to the left of the summary. */
+#CaseInfoInner { grid-template-columns: auto 220px auto auto !important; }
+#HdrStateBadge { grid-area: 1 / 1 !important; margin: 0 !important; align-self: start; }
+#HdrHeadline { grid-column: 2 !important; }
+#HdrStatusTag { grid-column: 3 !important; }
+#HdrCaseNum { grid-column: 4 !important; }
+#HdrOpened, #HdrEventLogLink { grid-column: 3 / span 2 !important; }
+
+/* Case modal: decision banner readable, matching the page banner. */
+[id$=ModalFeedbackContainer], [id$=ModalFeedbackContainer] * { color: #fff !important; }
+[id$=ModalFeedbackContainer] { padding: 8px 12px; border-radius: 4px; margin: 4px 0; }
+
+/* Your cases: arrow instead of the word Open on the load button. The word stays for screen readers. */
+[id$=OpenCaseBtn] { font-size: 0 !important; width: 28px; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; }
+[id$=OpenCaseBtn]::after { content: "\2192"; font-size: 16px; line-height: 1; }
+
+/* Decision buttons: the button is grey while disabled, so the spinner must be dark to show. */
+.decision-btn .btn-spinner { width: 16px; height: 16px; margin-top: -8px; border-color: #1f2937 rgba(31, 41, 55, 0.25) rgba(31, 41, 55, 0.25) !important; }
+
+/* Review tables: shared first six columns line up on all tabs; the rest fill what is left. Decided by is hidden until it is removed from the model. */
+#InboxTable th:nth-child(1), #InboxTable td:nth-child(1), #DecidedTable th:nth-child(1), #DecidedTable td:nth-child(1), #ExamplesTable th:nth-child(1), #ExamplesTable td:nth-child(1) { width: 7.5% !important; }
+#InboxTable th:nth-child(2), #InboxTable td:nth-child(2), #DecidedTable th:nth-child(2), #DecidedTable td:nth-child(2), #ExamplesTable th:nth-child(2), #ExamplesTable td:nth-child(2) { width: 10% !important; }
+#InboxTable th:nth-child(3), #InboxTable td:nth-child(3), #DecidedTable th:nth-child(3), #DecidedTable td:nth-child(3), #ExamplesTable th:nth-child(3), #ExamplesTable td:nth-child(3) { width: 125px !important; min-width: 125px !important; }
+#InboxTable th:nth-child(4), #InboxTable td:nth-child(4), #DecidedTable th:nth-child(4), #DecidedTable td:nth-child(4), #ExamplesTable th:nth-child(4), #ExamplesTable td:nth-child(4) { width: 12% !important; }
+#InboxTable th:nth-child(5), #InboxTable td:nth-child(5), #DecidedTable th:nth-child(5), #DecidedTable td:nth-child(5), #ExamplesTable th:nth-child(5), #ExamplesTable td:nth-child(5) { width: 22.5% !important; }
+#InboxTable th:nth-child(6), #InboxTable td:nth-child(6), #DecidedTable th:nth-child(6), #DecidedTable td:nth-child(6), #ExamplesTable th:nth-child(6), #ExamplesTable td:nth-child(6) { width: 7% !important; }
+#InboxTable th:nth-child(7), #InboxTable td:nth-child(7) { width: 14% !important; }
+#InboxTable th:nth-child(8), #InboxTable td:nth-child(8) { width: 14.5% !important; }
+#DecidedTable th:nth-child(7), #DecidedTable td:nth-child(7) { width: 8.5% !important; }
+#DecidedTable th:nth-child(8), #DecidedTable td:nth-child(8) { display: none !important; }
+#DecidedTable th:nth-child(9), #DecidedTable td:nth-child(9) { width: 11% !important; }
+#DecidedTable th:nth-child(10), #DecidedTable td:nth-child(10) { width: 9% !important; }
+#ExamplesTable th { white-space: nowrap !important; }
+#ExamplesTable td:nth-child(1), #ExamplesTable td:nth-child(2), #ExamplesTable td:nth-child(3) { white-space: nowrap !important; }
+#ExamplesTable th:nth-child(7), #ExamplesTable td:nth-child(7) { width: 8.5% !important; }
+#ExamplesTable th:nth-child(8), #ExamplesTable td:nth-child(8) { width: 11% !important; }
+#ExamplesTable th:nth-child(9), #ExamplesTable td:nth-child(9) { width: 9% !important; }
+
+/* Review tables: stop Case and Kind clipping at narrower widths. */
+#InboxTable th:nth-child(1), #InboxTable td:nth-child(1), #DecidedTable th:nth-child(1), #DecidedTable td:nth-child(1), #ExamplesTable th:nth-child(1), #ExamplesTable td:nth-child(1) { width: 8.5% !important; }
+#InboxTable th:nth-child(2), #InboxTable td:nth-child(2), #DecidedTable th:nth-child(2), #DecidedTable td:nth-child(2), #ExamplesTable th:nth-child(2), #ExamplesTable td:nth-child(2) { width: 11% !important; }
+#InboxTable th:nth-child(5), #InboxTable td:nth-child(5), #DecidedTable th:nth-child(5), #DecidedTable td:nth-child(5), #ExamplesTable th:nth-child(5), #ExamplesTable td:nth-child(5) { width: 20% !important; }
+#InboxTable th:nth-child(6), #InboxTable td:nth-child(6), #DecidedTable th:nth-child(6), #DecidedTable td:nth-child(6), #ExamplesTable th:nth-child(6), #ExamplesTable td:nth-child(6) { width: 8% !important; }
+
+/* Learnings: room for the Guidance box and the Promote or Demote button. */
+#ExamplesTable th:nth-child(7), #ExamplesTable td:nth-child(7) { width: 7.5% !important; }
+#ExamplesTable th:nth-child(8), #ExamplesTable td:nth-child(8) { width: 13% !important; }
+#ExamplesTable th:nth-child(9), #ExamplesTable td:nth-child(9) { width: 10% !important; }
+#ExamplesTable td:nth-child(8) input { width: 100% !important; min-width: 0 !important; box-sizing: border-box; }
+#ExamplesTable td:last-child .btn, #ExamplesTable td:last-child button { width: 100% !important; min-width: 0 !important; padding-left: 4px !important; padding-right: 4px !important; box-sizing: border-box; }

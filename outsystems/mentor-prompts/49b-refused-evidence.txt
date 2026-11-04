@@ -1,0 +1,9 @@
+Evidence for prompt 49, from the runtime logs for CASE-0073. Prompt attack detection is Active with Block request and raise exception, so the setting is not the cause.
+
+11:24:10 AgentTurn: "Failed to call AI model. Status code: BadRequest. Guardrail violation: Prompt attack detection. Input blocked (Prompt Attack). Applied: mandatory guardrail. (OS-ABRS-FM-40005)". Logged as Information in BranchConciergeAgentV2, category BranchConcierge.
+11:24:11, 11:24:15, 11:25:09, 11:25:16, 11:25:17, 11:25:22 SummariseTranscriptFlow: the same block, because the transcript contains the attack text.
+11:25:15 AgentTurn: the same block, on the rerun after the rejection.
+
+So the guardrail works. AgentTurn catches the block and returns an empty reply with no refused signal, and the chatbot treats that as "empty reply". The summariser is then blocked on every refresh, which is why the Overview is empty and the headline falls back and compounds.
+
+Please base your answer on this. If AgentTurn needs a change to return a refused signal, tell me exactly what to send in BranchConciergeAgentV2. Without changing signatures, the existing Reasons output could carry a fixed marker such as "guardrail_blocked". Also, on a refused case, do not send the attack text to the summariser: use a fixed Overview and a fixed "Refused request" topic.

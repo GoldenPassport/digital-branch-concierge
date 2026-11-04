@@ -95,7 +95,7 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
 
 1. **Install ODC Studio** from Portal > Apps > Download ODC Studio, and sign
    in with your organisation address (for example `yourname.outsystems.dev`).
-2. **Turn on prompt attack detection.** Portal > Configure > Agent guardrails
+2. **Turn on prompt attack detection.** Portal > Management > Configure > Agent guardrails
    > Edit: switch on Prompt attack detection, keep Block request and raise
    exception, Save and apply. The agent app turns the block into a polite
    refusal.

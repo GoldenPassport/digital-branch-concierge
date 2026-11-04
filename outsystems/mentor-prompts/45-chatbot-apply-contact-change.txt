@@ -1,0 +1,15 @@
+Send in Branch Concierge Chatbot App V2. Do not publish. Do not rename elements, change public service action signatures or touch the workflow. Keep zero errors and warnings.
+
+Problem: after the customer says yes, RunAgent calls ExecuteSkill for update_contact_details and replies "Done. I have changed your ...". In the agent app, ExecuteSkill only logs another pending ContactChangeRequest. Its Success = True only means that request was logged. The Customer record never changes, and each confirmation adds a duplicate pending row. So the customer is told something untrue.
+
+I have published a new agent service action, ApplyContactChange(CustomerId, Reference) -> Success, Field, NewValue, Message, and added it to this app's dependencies. It applies a pending request to Customer, marks it applied, writes DecisionLog, and returns Success = False if no pending row matches.
+
+Change the confirmed flow:
+1) In RunAgent's yes path, replace the ExecuteApprovedSkill call to ExecuteSkill with a call to ApplyContactChange.
+2) It must apply the request that belongs to this review case, not just any pending request for the customer. Customers can have several older pending rows. Tell me how you match it. Match on customer, field and approved value, newest first, created in this case's session, if there is no direct link.
+3) Say "Done. I have changed your <field> to <NewValue>." only when Success = True, using the Field and NewValue that it returned. Only then run MarkExecuted, UpdateReviewCaseExecuted, AddEventExecuted and LogCaseEventExecuted.
+4) If Success = False, do not mark it executed. Use the existing "nothing has been changed" reply and staff follow-up, and record the returned Message on the case.
+5) In the no path, and when the decision owner rejects, call SetContactChangeStatus for that same request's Reference, with Status "cancelled" for the customer's no and "rejected" for the owner's rejection, so it does not stay pending.
+6) Check the gate in RunImpactPolicyGate still lets this turn through. ApplyContactChange writes a DecisionLog row with Step apply_contact_change and Outcome applied. Make sure GetOtherSkillRows does not count that row as another skill. Make sure the check on the confirmation event's value still works now that no new change request is created this turn.
+
+When done, list every element you changed and how the request is matched.

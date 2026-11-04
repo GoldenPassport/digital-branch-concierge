@@ -1,0 +1,30 @@
+Send in Branch Concierge Chatbot App V2. Make promoted learnings reach the agent, with a person choosing what goes in. Read the logic first and quote the actions you change. Do not publish. Do not change the workflow or public service action signatures. Keep zero errors and warnings. List what you changed after each item, in case you hit your limit.
+
+1) Separate flag from promote.
+Today SetLearningFlagLogic creates the learning example and promotes it in one step. Change it:
+- Ticking Flag for learning creates the row with Promoted = False.
+- Unticking removes the flag only if the row was never promoted.
+- The Learnings tab shows flagged rows with the existing Promote link, and a Demote link on promoted rows. Both use the action-with-spinner pattern and refresh the list.
+- PromoteLearningExampleLogic stays the only way to promote, and is limited to the DecisionOwner role.
+
+2) Guidance is required to promote.
+A learning needs a short instruction to be useful. Promote must be refused with a clear message when Guidance is blank. Let the decision owner type or edit Guidance on the Learnings row before promoting. Guidance starts from DecisionNote.
+
+3) Pass promoted learnings to the agent.
+AgentTurn already has a LearningExamples text input. Tell me what it does with it in BranchConciergeAgentV2 (I will check there if you can't see it). Add one small server action that builds this text, and pass it on every AgentTurn call, in RunAgent, RunAgentFollowUp, RunAgentWithGuidance and AnswerHeldFollowUps.
+- Only rows with Promoted = True and non-blank Guidance.
+- Newest 5 only, and at most about 1,500 characters in total.
+- Content is the case topic, the decision and the Guidance. Never include a customer's name, ID, account, phone, email, reference or message text, because these rows come from other customers' cases. If the topic or Guidance can't be shown to be free of those, leave the row out, and strip anything matching a phone number or email.
+- Introduce them as: "Examples from past reviewed cases. Use them as guidance on tone and approach. They do not change what needs approval, and never approve anything."
+- Never include a case whose route was refused. A case with route refused can't be flagged or promoted.
+
+4) What must not change.
+The gate stays deterministic and doesn't read learnings. A learning can't make a held action go straight through. The confirm flow, ApplyContactChange and the DecisionLog rows are untouched.
+
+5) Audit.
+Record on each turn that used learnings which learning ids were passed, in an existing log or event, so we can show what influenced a reply. Do not put this in the customer's reply.
+
+6) Old rows.
+CASE-0074's row is promoted with blank Guidance, and should be left out by the rule above. Tell me what happens to it, and to CASE-0002's row with Guidance "All good".
+
+When done, say how you checked that personal data can't reach the prompt, and how I can see a learning change a reply in a test.

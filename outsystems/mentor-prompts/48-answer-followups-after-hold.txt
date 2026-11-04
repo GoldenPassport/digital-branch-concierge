@@ -1,0 +1,23 @@
+Send in Branch Concierge Chatbot App V2. Build the design you proposed for questions asked during a hold, with one choice made: no workflow change. Do not publish. Do not rename elements or change public service action signatures. Keep zero errors and warnings. List what you changed after each item.
+
+1) Read back the follow-ups.
+Add one small server action that returns the unanswered "Customer follow-up" events for a review case, oldest first, joined into one text. Mark them answered once they have been answered, so a question is never answered twice. If you need a new attribute or event for that, add it and tell me.
+
+2) Decisions that go through the agent.
+In RunAgentFollowUp, for outcomes that already call the agent, such as a rejection or a send back, add those follow-ups to FollowUpMessage: "The customer also asked: ... Answer briefly after telling them the decision. Do not decide anything new." AgentFlow, the risk roll-up and CallImpactPolicyGate run on that turn as normal.
+
+3) Approved contact changes.
+That path does not call the agent at the decision, and the customer is asked to confirm. Keep that.
+- In RunAgent, on the customer's yes, after ApplyContactChange succeeds and the fixed "Done" reply is ready, if there are unanswered follow-ups, run one more agent turn with them as the message. Do the same on the no path, after the "I have not made any change" reply.
+- The customer gets it as a separate message after the fixed reply. Do not merge it into the "Done" text, and do not change that text. Tell me how a second message is delivered and in what order, because the workflow delivers RunAgent's Reply.
+- The gate must check that turn. A low-risk answer is delivered. If that turn uses a medium-risk skill, or anything else is held, it must not deliver the answer as done and must not touch the change already applied; a new review opens as normal.
+- The "Done" reply and the applied change must not depend on the second turn. If the second turn fails, the customer still gets "Done", and the follow-up stays unanswered and is logged on the case.
+- Do not let the exemption for the confirmed action cover the second turn.
+
+4) A plain agreement during a hold.
+In AttachFollowUp, if the message is only an agreement such as "yes", "ok" or "thanks", reply "Thanks. Your request is still with a member of staff and I'll update you here as soon as there's a decision." Do not log it as a follow-up. It must not confirm anything.
+
+5) Case modal.
+In Review & approvals, show unanswered follow-ups to the decision owner under a "Customer also asked" label. Show the same list above Proposed reply on a pending review.
+
+When done, list every element you changed and say how you checked each path in the logic.
