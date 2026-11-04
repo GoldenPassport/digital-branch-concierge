@@ -163,4 +163,4 @@ Found: publishing Agent V2 runs BootstrapOnPublish, which reset Customer to seed
 
 ## Saved 4 Nov 2026, 13:40
 
-`apps/*.oml` exported from Studio: Agent V2 Revision 3, Chatbot App V2 Revision 19. Workflow .oml in the repo is still the 1 Nov export; the live workflow is Revision 1 of 3 Nov 12:54 (Export to OML is in the workflow editor's more options menu). Prompt 53 written, not sent.
+`apps/*.oml` exported from Studio: Agent V2 Revision 3, Chatbot App V2 Revision 19. `workflow/*.oml` exported from the workflow editor (more options, Export to OML): Revision 1 of 3 Nov 12:54. Prompt 53 written, not sent.
