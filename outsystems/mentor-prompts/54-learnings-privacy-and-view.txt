@@ -1,0 +1,11 @@
+Send in Branch Concierge Chatbot App V2. Two changes to the Learnings tab on Review Cases. Read the logic first. Do not publish. Do not change public service action signatures or the workflow. Keep zero errors and warnings. List what you changed after each item.
+
+1) Remove the Customer name column from the Learnings table. Keep Customer ID. Give the freed width to Headline and Guidance. If nothing else uses it, also stop GetLearningExamples returning the customer name, so it is not sent to the browser on this tab. Do not change the Inbox or Decided tables. Tell me whether the search box still matches hidden customer names on this tab. Do not change the search yet.
+
+2) On promoted rows only, add a small "View prompt" button next to Demote. Do not show it on unpromoted rows. It opens a read-only popup titled "What the agent receives" showing:
+- the exact text this learning contributes to the agent's prompt. Build it with the same logic as BuildLearningExamplesText, by moving the per-row formatting into one shared action used by both, so the popup cannot differ from what the agent gets. Do not change the text the agent receives.
+- the case number, who promoted it and when, if those are stored. If they are not stored, leave them out and tell me. Do not add attributes.
+- this note: "Checked on promotion: no email addresses, links, references or numbers of three or more digits. Names are not detected automatically, so the person promoting reviews the wording."
+A Close button. No writes, no agent call, and no customer name in the popup.
+
+Report only: exactly what BuildLearningExamplesText sends for one row. Does it include anything besides the Guidance text, such as the headline, customer ID, customer message or reply? If any of those could carry personal details into the prompt, tell me which, and do not change it yet.

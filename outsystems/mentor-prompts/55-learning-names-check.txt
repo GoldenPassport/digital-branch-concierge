@@ -1,0 +1,9 @@
+Send in Branch Concierge Chatbot App V2. Keep the Topic in the learning line, but stop customer names reaching the agent through learnings. Read the logic first. Do not publish. Do not change public service action signatures or the workflow. Keep zero errors and warnings. List what you changed after each item.
+
+1) FormatLearningLine: leave out the Topic, and send the rest of the line, when the Topic contains the case customer's first name or last name (whole word, ignoring case) or a masked placeholder (any text in curly braces, such as {NAME} or {PHONE}). Look the name up on the server only. Do not send it to the browser or add it back to the Learnings rows. The View prompt popup uses the same formatter, so it must show the same result.
+
+2) LearningTextIsSafe, or the promotion logic that calls it: also refuse Guidance that contains the case customer's first name or last name (whole word, ignoring case). Use the existing refusal path, so the typed text stays in the box. Change the refusal message to: "Guidance can't contain the customer's name, email addresses, links, references or numbers of three or more digits. Rewrite it in general terms."
+
+3) Change the popup note to: "Checked on promotion: no customer name, email addresses, links, references or numbers of three or more digits. Other names are not detected automatically, so the person promoting reviews the wording."
+
+Report only: if the customer's name cannot be found for a row, what does each check do? It must fail safe: leave the Topic out, and refuse the promotion.

@@ -94,3 +94,13 @@
 #ExamplesTable th:nth-child(9), #ExamplesTable td:nth-child(9) { width: 10% !important; }
 #ExamplesTable td:nth-child(8) input { width: 100% !important; min-width: 0 !important; box-sizing: border-box; }
 #ExamplesTable td:last-child .btn, #ExamplesTable td:last-child button { width: 100% !important; min-width: 0 !important; padding-left: 4px !important; padding-right: 4px !important; box-sizing: border-box; }
+
+/* Learnings after removing Customer name: eight columns, tested live at 1280 wide on 5 Nov 2026. */
+#ExamplesTable th:nth-child(1), #ExamplesTable td:nth-child(1) { width: 9% !important; min-width: 0 !important; }
+#ExamplesTable th:nth-child(2), #ExamplesTable td:nth-child(2) { width: 12% !important; min-width: 0 !important; }
+#ExamplesTable th:nth-child(3), #ExamplesTable td:nth-child(3) { width: 11% !important; min-width: 0 !important; }
+#ExamplesTable th:nth-child(4), #ExamplesTable td:nth-child(4) { width: 21% !important; min-width: 0 !important; }
+#ExamplesTable th:nth-child(5), #ExamplesTable td:nth-child(5) { width: 8.5% !important; min-width: 0 !important; word-break: normal !important; overflow-wrap: normal !important; }
+#ExamplesTable th:nth-child(6), #ExamplesTable td:nth-child(6) { width: 8.5% !important; min-width: 0 !important; word-break: normal !important; overflow-wrap: normal !important; }
+#ExamplesTable th:nth-child(7), #ExamplesTable td:nth-child(7) { width: 17% !important; min-width: 0 !important; }
+#ExamplesTable th:nth-child(8), #ExamplesTable td:nth-child(8) { width: 13% !important; min-width: 0 !important; }

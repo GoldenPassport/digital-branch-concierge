@@ -1,0 +1,5 @@
+Send in Branch Concierge Agent V2. One small instruction change to the SummariseCase agent. Read it first. Do not publish. Do not change public service action signatures or anything else. Keep zero errors and warnings.
+
+Add this to the SummariseCase instructions: "The topic in the headline must describe the type of request only. Never include a person's name, phone number, email address, account number, reference or address in it."
+
+Keep the rest of the instructions as they are, and quote the final instructions in your reply. Tell me whether the same instruction text also shapes the Overview. If it does, tell me how the Overview is affected. Do not change anything else.
