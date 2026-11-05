@@ -99,6 +99,23 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    > Edit: switch on Prompt attack detection, keep Block request and raise
    exception, Save and apply. The agent app turns the block into a polite
    refusal.
+
+   **Before testing, also switch on these two guardrails on all four agents.**
+   They are Portal settings, not in the `.oml` files, so check them after every
+   install: Portal > Agents > Branch Concierge Agent V2 > Agent elements, select
+   each agent, then Edit.
+
+   | Agent | Prompt attack detection | Harmful content filtering | Personal information exposure |
+   |---|---|---|---|
+   | CallAgent | Block request and raise exception | Block request and raise exception | Log and continue |
+   | CheckReply | Block request and raise exception | Block request and raise exception | Log and continue |
+   | ClassifyReply | Block request and raise exception | Block request and raise exception | Mask sensitive data, log and continue |
+   | SummariseCase | Block request and raise exception | Block request and raise exception | Mask sensitive data, log and continue |
+
+   Personal information exposure opens on Block request and raise exception.
+   Change it as above: on CallAgent, Block would stop a customer giving a new
+   phone number. The customer's own details still reach the model on CallAgent,
+   because the agent needs them to do the job.
 3. **Add the model.** Portal > Integrate > AI models > Add AI model > Custom
    connection, named `deepseek-flash`. Endpoint: name and model id
    `deepseek-flash`, URL `https://api.deepseek.com` (ODC adds
