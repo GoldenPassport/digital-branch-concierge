@@ -103,7 +103,8 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    **Before testing, also switch on these two guardrails on all four agents.**
    They are Portal settings, not in the `.oml` files, so check them after every
    install: Portal > Agents > Branch Concierge Agent V2 > Agent elements, select
-   each agent, then Edit.
+   each agent, then Edit. Save each agent before selecting the next one, then
+   check that its settings stayed.
 
    | Agent | Prompt attack detection | Harmful content filtering | Personal information exposure |
    |---|---|---|---|
