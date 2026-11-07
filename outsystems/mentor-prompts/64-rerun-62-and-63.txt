@@ -1,0 +1,21 @@
+Send in Branch Concierge Chatbot App V2. Four items. This repeats an earlier request whose changes were lost before publishing, so start from the app as it is now. Read the logic first. Do not publish. Do not change the workflow or how the chat polls. If anything needs a change in the agent app, stop and tell me what, before changing it. Keep zero errors and warnings. List what you changed after each item.
+
+1) Show when a reply carries a staff decision. Every reply delivered with route decision_owner is labelled "Staff member (LA)" instead of "Agent", where LA is the initials of the person who decided. That covers an approved reply sent as written, a declined request with its explanation, and "has been approved, would you like me to go ahead?". Apply this on both the Chat screen and the Conversation flow in the case modal and case detail screen, including the icon next to the label on the Chat screen. Store the initials on the reply when it is delivered, so the label does not change later if a name changes or the case moves. All other routes keep the "Agent" label and icon, including straight_through ("Done. I have changed your phone number") and closed. Replies already stored have no initials and keep showing "Agent". Add a field only if nothing suitable exists, and do not change any public service action signature.
+
+2) A case closes too early after an unedited review approval. CASE-0004: the reviewer approved a reply that asks the customer a question ("What would the appointment be about?"). The reply was delivered at 16:46 and the case closed in the same minute, so the customer cannot answer in that case. Report why it closed: quote the value or condition that ended it. Then, if it can be fixed in this app without a workflow change, make the reply from FinalReply leave the case waiting for the customer in the same way an agent reply does. If it needs a workflow change, change nothing for this item and tell me exactly what the workflow would need.
+
+3) The closing message shows an empty "Reasons:" line under Behind the scenes (Route: closed, on CASE-0006). Hide the Reasons line whenever there are no reasons. Do not invent a reason.
+
+4) An approved multi-part request drops the other answer. CASE-0037: the customer asked to change their phone number and for their balance. The ProposedReply the reviewer approved gave the balance, but after approval the customer only got the fixed template from RunAgentFollowUp ('Your request to change your phone number ... has been approved. Would you like me to go ahead?'), so the balance never reached them. Fix it this way:
+For a kind approval case with a pending change, when the approved reply also contains answers that do not depend on the approval, ask the agent to write the confirmation message from the approved reply.
+
+The message must: state that the change was approved, include the other answers once, and ask the customer to confirm the change. Instruct the agent to use only facts in the approved reply and the pending change, add no new facts, figures or promises, and not say the change is waiting for approval.
+
+Safeguards:
+a) Run the rewritten message through the same gate as other agent replies, using the same guardrail exception handling.
+b) Check that the new phone value or field value from the pending change appears in the message. Check that every number in the message appears in the approved reply or the pending change.
+c) If the agent call fails, the gate holds it, or a check fails, send the existing fixed sentence followed by: "A member of staff will follow up on the rest of your request." Never lose the confirmation question, and never leave the case without a reply. Log which path was taken in the existing decision log.
+
+Single-request cases must not call the agent and must read exactly as they do now. Tell me how you tell single-request from multi-request, and how reliable that is. Confirm that the customer's "yes" or "no" afterwards still works as it does now, and that this reply still carries the staff label and initials.
+
+Rejected cases and kind review cases do not change. List what you changed.

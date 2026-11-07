@@ -1,0 +1,16 @@
+Send in Branch Concierge Chatbot App V2. Report only. Do not change anything and do not publish. Read the Review Cases decision logic (the Approve and Reject screen actions and the server actions they call), GetReviewOutcome, RunAgentFollowUp, SetOutcomeReply and the case modal's local variables.
+
+Evidence from the ReviewCase table:
+Id 1, kind approval, approved 13:00, no note: OutcomeReply "Your request to change your phone number ... has been approved. Would you like me to go ahead and make the change?" Customer saw route decision_owner. Correct.
+Id 2, kind approval, approved 14:00, DecisionNote "Accounts can only be closed in person. Please visit a branch with photo ID.": I never typed that note on this case. I typed it on Id 5, rejected in the same page session 2 minutes earlier. OutcomeReply equals the original ProposedReply, "It's now waiting for approval". Customer saw route review, reason "reply accepted by reviewer". Wrong.
+Id 6, kind approval, approved 14:04 after a page reload, no note: same wrong result as Id 2.
+Id 3, kind review, approved 14:02, no note, ProposedReply gave the opening hours: OutcomeReply "Thank you for waiting. A member of staff will contact you about this shortly." The hours were not sent. Looks wrong.
+Id 5, kind review, rejected with a note: agent explained the decline, route decision_owner. Correct.
+All approvals left the Proposed reply box unedited.
+
+Answer exactly:
+1) What decides between the path that runs RunAgentFollowUp and the path that delivers the proposed reply ("reply accepted by reviewer")? Quote the conditions and the values for each of these five rows. Why did Id 1 and Id 6 go different ways?
+2) Why does approving a kind review case without editing produce "A member of staff will contact you", instead of sending the proposed reply?
+3) Why did Id 5's note get saved on Id 2? Which variable keeps it, and which other modal values can carry over to the next case (edited reply, flag for learning)?
+4) Did prompts 57 or 58 (scroll and chat history changes) touch anything these paths use?
+5) What is the smallest fix for each, as a list? Do not make it yet.

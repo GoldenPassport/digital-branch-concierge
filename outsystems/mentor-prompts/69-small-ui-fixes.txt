@@ -1,0 +1,23 @@
+Send in Branch Concierge Chatbot App V2 after the 7 Nov retest (revision 8).
+
+Three small display fixes. Change nothing else.
+
+1) Reasons spacing. Route reasons are stored joined with ";" and no space, so the chat shows "Reasons: open complaint on record;policy keyword in request". Wherever a Reasons line is shown (the Behind the scenes block on the Chat screen and the Conversation flow in the case modal and case detail), show the reasons with "; " between them. Change only the displayed text, not the stored value or how reasons are written.
+
+2) Stable sort order. On the Review Cases screen, the Inbox, Decided and Learnings lists sort by the column the user clicks, but rows with the same value (for example several cases for C1001 when sorting by Customer ID) come back in no fixed order. Add a second sort on Raised, newest first, after the user's chosen sort, in each of the three aggregates. Keep the current default sort and the clickable column sorting as they are.
+
+3) Learnings table widths. Append this CSS to the end of the theme stylesheet used by this app (BranchConciergeDemotestapp), exactly as written:
+
+/* Learnings (8 columns): wider Guidance box; Status label sits apart from its button. Tested live 7 Nov 2026. */
+#ExamplesTable th:nth-child(4), #ExamplesTable td:nth-child(4) { width: 16% !important; }
+#ExamplesTable th:nth-child(7), #ExamplesTable td:nth-child(7) { width: 21% !important; }
+#ExamplesTable th:nth-child(8), #ExamplesTable td:nth-child(8) { width: 14% !important; }
+#ExamplesTable td:nth-child(7) { padding-left: 8px !important; padding-right: 8px !important; }
+#ExamplesTable td:nth-child(7) .input-text { display: block !important; width: 100% !important; }
+#ExamplesTable td:nth-child(7) input { width: 100% !important; min-width: 0 !important; box-sizing: border-box; }
+#ExamplesTable td:last-child > span:first-child { display: inline-block; margin-right: 8px; min-width: 24px; vertical-align: middle; }
+#ExamplesTable td:last-child .btn, #ExamplesTable td:last-child button { width: auto !important; margin: 2px 4px 2px 0; vertical-align: middle; }
+
+If the theme is in another app or library that you cannot change from here, do not change it; tell me where it is instead.
+
+Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep zero errors and warnings. List what you changed.

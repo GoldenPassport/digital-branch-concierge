@@ -164,3 +164,19 @@ Found: publishing Agent V2 runs BootstrapOnPublish, which reset Customer to seed
 ## Saved 4 Nov 2026, 13:40
 
 `apps/*.oml` exported from Studio: Agent V2 Revision 3, Chatbot App V2 Revision 19. `workflow/*.oml` exported from the workflow editor (more options, Export to OML): Revision 1 of 3 Nov 12:54. Prompt 53 written, not sent.
+
+## Fresh install and retest, 5 Nov 2026
+
+Apps and workflow deleted by Luke, then reinstalled from the master files. Keys unchanged. Live: Agent V2 Rev 1, Chatbot App V2 Rev 3 (prompts 57 and 58), workflow Rev 1. Tables started empty.
+
+Guardrails: Prompt attack (stage baseline) survives a reinstall. Per-agent Harmful content and Personal information exposure had to be set again in the Portal. Save each agent before selecting the next.
+
+Passed: straight through; phone change held, approved, "yes", applied (Customer table, DecisionLog 4 to 9); timeout closed CASE-0001 at 13:12. Routing read from chat and Inbox, not yet in DecisionLog: vulnerability flag, open complaint, policy keyword closure, refused prompt attack. Scroll: no jump on poll, button shows and hides on an open case. Customer switch no longer shows another customer's replies.
+
+Findings: masking on SummariseCase does not remove a phone number from the Overview (twice, about 30 minutes after saving). Workflow shows the role as DecisionOwner2 though the role is DecisionOwner; approval works. Case headlines and the Your cases panel are staff-only, per Luke, so a flag in the headline is acceptable; check it does not reach a learning Topic.
+
+Still to run: reject with note; approve and no; correction; multi-request; follow-ups; harmful content block; flag, promote, demote and reply effect; sorting on all tabs; Learnings widths on the live build. Re-export the chatbot (Rev 3) and commit.
+
+## Clean run on a fresh install, 7 Nov 2026
+
+Files backed up to `Backup/2026-11-07 before clean run/`, latest revisions exported, all three assets deleted by Luke and imported again per the README (all revision 1, 14:34 to 14:35), guardrails and DecisionOwner set. T01 to T12 and the extended set passed and were checked in the Customer, ContactChangeRequest, Appointment and DecisionLog tables. Gaps: double send on one Enter press (prompt 71, not sent), multi-request rewrite fell back for C1001 ("failed: no-question"), harmful content labelled as prompt attack. Full results: `evaluations/clean-run-2026-11-07.md`.

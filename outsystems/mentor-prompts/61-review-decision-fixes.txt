@@ -1,0 +1,20 @@
+Send in Branch Concierge Chatbot App V2. Five fixes to the Review Cases decision path, following your last two answers. Read the logic first. Do not publish. Do not change the workflow, the agent app, or how the chat polls. Keep zero errors and warnings. List what you changed after each item.
+
+Check first: item 1 relies on a server action's database changes being committed when it returns to the client, before the client's next server call starts. If that is not true in ODC, stop before changing anything and tell me why.
+
+1) The workflow can read a blank decision. Raise ReviewDecided only after the decision is committed.
+Create a server action that raises ReviewDecided and does nothing else with the data. Remove the raise from RecordReviewDecisionLogic, and move the outcome detail update and RefreshCaseHeadline so they still run inside the decision step. In the Approve and Reject screen actions, call the new action as a separate server call, only after the decision call returned without error. The new action checks the same role as the decision, and raises the event only if that ReviewCase has a non-empty Decision. If you find any other caller of RecordReviewDecisionLogic or any other place the event is raised, list it and apply the same change. This must cover take over and send back too if they use the same path.
+
+2) The note and the flag carry over to the next case.
+Clear DecisionNote and reset the Flag for learning variable every time a case opens in the modal and after a decision succeeds. When the case being opened already has FlagForLearning True, show it as ticked.
+
+3) Approving a kind review case without editing sends "A member of staff will contact you".
+For kind review only: when it is approved, FinalReply becomes the edited reply if there is one, otherwise ProposedReply. In RunAgentFollowUp, when the case is kind review, Decision is approved and FinalReply has text, deliver FinalReply exactly as written, skipping the agent and the gate. A person has approved the wording, so it goes out as is. Log the decision as today. Kind approval must behave exactly as it does now: approving a change still sets awaiting_confirmation and the agent still asks the customer to confirm. Rejected cases must behave as they do now. If RunAgentFollowUp is not in this app, stop and tell me.
+
+4) Ticking Flag for learning just before Approve made no LearningExample row.
+Pass the current value of the tick into the decision as an input, and have the decision step use that input to set FlagForLearning and create the LearningExample row, instead of the value it read from the record. Add the input only if the action is not called from outside this app; otherwise tell me what calls it. The Topic and Guidance name checks must still apply, and a refused row must behave as it does now.
+
+5) Reopening a case can show an old edited reply.
+Reset the edited reply box to that case's own reply whenever a case opens in the modal.
+
+Finally, write out the Approve path as a numbered list as it now stands, and the same for Reject. State whether anything can still raise ReviewDecided before the decision is committed.

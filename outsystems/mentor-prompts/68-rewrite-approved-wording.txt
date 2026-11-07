@@ -1,0 +1,14 @@
+Send in Branch Concierge Chatbot App V2 after the prompt 67 retest (CASE-0100).
+
+The rewrite now passes the gate, but the content check failed on CASE-0100 (C1004, phone change plus balance, approved by staff without edits). DecisionLog row 138, reply_check, outcome issues: "The reply says the phone number change has been submitted and is waiting for staff approval, so it does not state that the change is approved and directly contradicts the instruction not to say it is waiting for approval." Row 140, approval_confirmation, fallback_check_failed: "not-stated-approved says-waiting-for-approval. Gate reasons:" (none). The checks did their job; the agent wrote the wrong message.
+
+First tell me exactly what BuildApprovalConfirmation sends to the agent for this call: the instruction text, the approved reply text and how the pending change is passed (field names and any status value such as Pending). I suspect the agent sees the change as pending and falls back on its usual "waiting for staff approval" wording.
+
+Then fix it in this app only:
+1) Pass the approval as a stated fact, not only as an instruction. For example: "A member of staff has approved this change. Status: approved, not yet applied. The customer must now confirm before it is applied." Do not pass any status value that reads as pending or awaiting approval.
+2) Tell the agent to start the message with that the change has been approved, then give the other answers from the approved reply once, then ask the customer to confirm the change.
+3) Tell the agent to leave out any sentence from the approved reply that says the change is submitted, pending or waiting for approval.
+4) Allow one retry: if the content check fails, call the agent once more with the failed check named in the instruction. If the retry also fails, use the existing fallback. Log both attempts in DecisionLog under approval_confirmation.
+Keep the gate, the ignored reviewed reasons from prompt 67, and every other check exactly as now.
+
+If the agent's own instructions in the agent app force the "waiting for approval" wording, stop and tell me what would need to change there, before changing anything. Nothing else changes. Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep zero errors and warnings. List what you changed.

@@ -1,0 +1,22 @@
+Send in Branch Concierge Chatbot App V2 after the 7 Nov clean-run retest (revision 1 of the fresh import).
+
+Problem. Twice in the clean run one press of Enter in the chat started two workflow instances:
+- 14:42:53 and 14:43:01, instances 463 and 464, both session 7e6088ab..., ChatMessage rows 1 and 2 (two identical customer messages).
+- 15:08:24 and 15:08:26, instances 466 and 467, sessions a6239dce... (the current page) and 0e257e74... (the session of the page loaded before it), ChatMessage rows 13 and 14.
+The browser made two ActionGenerate_SessionId calls for one key press. Both times the customer id had just been typed and the chat history was still loading. Other sends (about ten) made one call each. The old history shows the same pattern on 7 Nov 12:23:35 (instances 364 and 365).
+
+What I found so far, for context:
+- ChatInputQuestion > OnReady runs BindEvents, which does addEventListener("keydown", Enter) and addEventListener("input", Resize) on the textarea, and nothing removes them (OnDestroy does not unbind).
+- Enter calls OnClick, which raises OnSendQuestion; the Chat screen's OnSendMessage then calls Generate_SessionId(ExistingSessionId = Conversation.GUID, ...), which calls SubmitCustomerRequest.
+- Generate_SessionId has Function = Yes.
+
+First tell me what you see: anything else that can run OnSendMessage or Generate_SessionId for one key press, and whether a re-rendered ChatInputQuestion can keep the same textarea and bind a second keydown listener.
+
+Then fix it in this app only, as small as possible:
+1) BindEvents: bind once per element. Keep a reference to the handlers on the element, remove any earlier ones before adding, so the textarea never holds more than one keydown and one input listener, and the one it holds belongs to the current block.
+2) OnDestroy of ChatInputQuestion: remove those listeners.
+3) OnSendMessage: ignore a send when the same text for the same customer was sent less than 15 seconds ago (keep the last sent text, customer and time in screen variables). Do not block a different message.
+4) Generate_SessionId: set Function to No unless something uses it in an expression; if something does, tell me what.
+Keep everything else as it is, including how a follow-up reuses the open case's session.
+
+Nothing else changes. Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep zero errors and warnings. List what you changed.

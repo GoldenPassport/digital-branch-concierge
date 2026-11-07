@@ -37,3 +37,10 @@ Prompts 10 to 12 complete it:
   instance id on every case and audit row.
 
 The workflow itself is built in the Portal's workflow editor, not by Mentor.
+
+Prompts 13 to 71 came after: 13 to 56 the case model, the review screens
+and the refactor to a skinny agent (Agent V2 and Chatbot App V2, see
+`../refactor-skinny-agent-plan.md`), 57 to 70 chat display, staff decision
+and approval confirmation fixes found in the November retests. 71 (a guard
+against one Enter press sending twice) is written but not sent: see
+`../evaluations/clean-run-2026-11-07.md`, finding 1.

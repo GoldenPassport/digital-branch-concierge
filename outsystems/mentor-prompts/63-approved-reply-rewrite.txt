@@ -1,0 +1,14 @@
+Send in Branch Concierge Chatbot App V2. Go with option 1 for item 4. Read the logic first. Do not publish. Do not change the workflow or how the chat polls. Keep zero errors and warnings. Do not change any public service action signature. If this needs a change in the agent app, stop and tell me what, before changing anything.
+
+For a kind approval case with a pending change, when the approved reply also contains answers that do not depend on the approval, ask the agent to write the confirmation message from the approved reply.
+
+The message must: state that the change was approved, include the other answers once, and ask the customer to confirm the change. Instruct the agent to use only facts in the approved reply and the pending change, add no new facts, figures or promises, and not say the change is waiting for approval.
+
+Safeguards:
+a) Run the rewritten message through the same gate as other agent replies, using the same guardrail exception handling.
+b) Check that the new phone value or field value from the pending change appears in the message. Check that every number in the message appears in the approved reply or the pending change.
+c) If the agent call fails, the gate holds it, or a check fails, send the existing fixed sentence followed by: "A member of staff will follow up on the rest of your request." Never lose the confirmation question, and never leave the case without a reply. Log which path was taken in the existing decision log.
+
+Single-request cases must not call the agent and must read exactly as they do now. Tell me how you tell single-request from multi-request, and how reliable that is. Confirm that the customer's "yes" or "no" afterwards still works as it does now, and that this reply still carries the staff label and initials.
+
+Rejected cases and kind review cases do not change. List what you changed.

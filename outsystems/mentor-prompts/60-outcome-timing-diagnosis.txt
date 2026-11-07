@@ -1,0 +1,10 @@
+Send in Branch Concierge Chatbot App V2. Report only. Do not change anything and do not publish. Correction to your last answer: Ids 2 and 6 were phone changes, not account closures. Both have a ChangeReference (CCR-IFDF, CCR-CEEF) and ExecutionStatus awaiting_confirmation, the same as Id 1, so a missing pending change does not explain them.
+
+I read the workflow. ReviewOutcome goes to the Approval branch when GetReviewOutcome.Outcome = "approved" or "rejected", then take_over, send_back, and otherwise Accepted. So for Ids 2 and 6 Outcome was not "approved" when the workflow read it, though Decision is approved in the table now. Id 1 was identical and took the Approval branch.
+
+Answer exactly:
+1) Quote the full logic of GetReviewOutcome: inputs, how it finds the row, and every value Outcome can take, including when Decision is still empty.
+2) In the Approve path, list the exact order of steps: updating ReviewCase, updating ReviewRound, any CommitTransaction, and raising ReviewDecided. Is the event raised before the decision is committed? Could the workflow read the row before it sees the decision, so Outcome is empty?
+3) Which row or rows can the workflow read when one workflow instance has several review cases, as Id 3 and Id 6 do?
+4) Id 6 has FlagForLearning True, approved 14:04, but LearningExample has no rows. Where is the LearningExample row created, and on which path? Would the Accepted path skip it?
+5) Give the smallest fix for the timing if it is the cause, and say whether it needs a workflow change. Do not make it.

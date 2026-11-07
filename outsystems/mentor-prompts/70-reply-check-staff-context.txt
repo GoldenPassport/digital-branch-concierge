@@ -1,0 +1,12 @@
+Send in Branch Concierge Chatbot App V2 after revision 9.
+
+The reply check raises false issues on messages that carry a staff decision, because it does not see that decision. Two examples from DecisionLog (step reply_check, outcome issues):
+- Row 178, CASE-0134 approval rewrite: "Includes the customer's available balance and overdrawn status, which are outside the phone-number-change scope and not in the supplied change details". The balance came from the approved reply, so it is allowed.
+- CASE-0134 decline (09:41): "Offers the customer the option to go ahead again or have staff pick it up, which effectively offers to change or revisit the rejected decision". The staff note asked the customer to send the request again, so this is what staff wanted.
+Both messages were still delivered, so nothing reached the customer wrongly, but the log reads as a problem.
+
+First tell me where the reply check for these two messages is built and run (which action, and whether the check's instructions live in this app or in the agent app), and what context it receives today.
+
+Then, in this app only: when the reply being checked is a staff-decision message (the approval confirmation from BuildApprovalConfirmation, or the decline message written after a rejection), pass the check the staff decision as context: the decision (approved or rejected), the reviewer's note if there is one, and for approvals the approved reply text. Tell the check that content taken from the approved reply, or that follows the reviewer's note, is allowed. Keep every other reply check exactly as it is, and keep BuildApprovalConfirmation's own checks and fallback unchanged.
+
+If the check's instructions live in the agent app and this cannot be done by passing context from here, stop and tell me what would need to change there, before changing anything. Nothing else changes. Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep zero errors and warnings. List what you changed.

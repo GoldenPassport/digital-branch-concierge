@@ -14,15 +14,21 @@ were built with Mentor, ODC's AI assistant, from the prompts in
 `mentor-prompts/`; the workflow was drawn in the Portal's workflow editor.
 You do not need to rebuild anything: import the files below.
 
+The V2 files were reinstalled from scratch and retested end to end on
+7 November 2026, following the steps below: all twelve test conversations
+passed, plus the staff decisions, learnings and timeout checks. Results and
+findings: `evaluations/clean-run-2026-11-07.md`.
+
 ## What is in here
 
 | File | What it is |
 | --- | --- |
-| `apps/Branch Concierge Agent.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
-| `apps/Branch Concierge Chatbot App.oml` | The customer chat, which starts a workflow per case, passes follow-up messages into it and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
-| `workflow/Branch Concierge Workflow.oml` | The workflow that runs each case: agent, gate, decision owner, reply, and the wait for the customer's answer. |
+| `apps/Branch Concierge Agent V2.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
+| `apps/Branch Concierge Chatbot App V2.oml` | The customer chat, which starts a workflow per case, passes follow-up messages into it and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
+| `workflow/Branch Concierge Workflow V2.oml` | The workflow that runs each case: agent, gate, decision owner, reply, and the wait for the customer's answer. |
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
-| `mentor-prompts/01` to `12` | The requests that built the two apps, in order. See `mentor-prompts/README.md`. |
+| `evaluations/clean-run-2026-11-07.md` | Results of the clean end-to-end run on a fresh install, checked against the data tables, with findings. |
+| `mentor-prompts/01` to `71` | The requests that built and refined the two apps, in order. See `mentor-prompts/README.md`. |
 
 Shared data, in `../shared`, is also used by the n8n and LangGraph builds:
 four demo customers (one with an open complaint, one with a vulnerability
@@ -34,9 +40,9 @@ nothing to load by hand.
 
 | In ODC | What it is |
 | --- | --- |
-| Branch Concierge Agent | The agent app: agent, skills, tools, gate, audit log, review cases |
-| Branch Concierge Chatbot App | The customer chat and the Review cases screen (`/BranchConciergeChatbotApp/Chat`) |
-| Branch Concierge Workflow | The workflow that runs each request |
+| Branch Concierge Agent V2 | The agent app: agent, skills, tools, gate, audit log, review cases |
+| Branch Concierge Chatbot App V2 | The customer chat and the Review cases screen (`/BranchConciergeChatbotAppV2/Chat`, `/BranchConciergeChatbotAppV2/ReviewCases`) |
+| Branch Concierge Workflow V2 | The workflow that runs each request |
 
 The apps were renamed from Branch Concierge Demo and Branch Concierge Demo
 test app on 17 October 2026; an app's URL follows its name.
@@ -124,18 +130,18 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    `Bearer <your key>` and `Content-Type` = `application/json`. Test
    endpoint, Add, then Save the model page.
 4. **Import the agent app.** ODC Studio > Organization > Open Files >
-   `apps/Branch Concierge Agent.oml`. In Automations > Agents > CallAgent,
+   `apps/Branch Concierge Agent V2.oml`. In Automations > Agents > CallAgent,
    check the AI model is `deepseek_flash`, shown as
    `Calldeepseek_flash` (or choose yours), then
    1-Click Publish. Publishing seeds the demo data.
-5. **Import the chatbot app.** Open `apps/Branch Concierge Chatbot App.oml`
+5. **Import the chatbot app.** Open `apps/Branch Concierge Chatbot App V2.oml`
    the same way. If Studio reports outdated references, use Manage
    dependencies to refresh Branch Concierge Agent, then 1-Click Publish.
 6. **Import the workflow.** Portal > Workflows > Import >
-   `workflow/Branch Concierge Workflow.oml`, open it and Publish. Publish the apps
+   `workflow/Branch Concierge Workflow V2.oml`, open it and Publish. Publish the apps
    first: the workflow starts on their `CustomerRequestReceived` event.
 7. **Make yourself the decision owner.** Portal > Govern > Users > your user
-   > End-user access > Manage roles: Branch Concierge Agent, Development stage,
+   > End-user access > Manage roles: Branch Concierge Agent V2, Development stage,
    DecisionOwner.
 8. **Check the sign-in provider.** The Review cases screen signs staff in
    through the stage's identity provider, named `OutSystems Community` in the
@@ -168,12 +174,24 @@ earlier policy request.
 
 Where to look afterwards:
 
-- **Portal > Workflows > Branch Concierge Workflow > instances**: one instance per
+- **Portal > Workflows > Branch Concierge Workflow V2 > instances**: one instance per
   case, labelled with the customer, the session and the message.
 - **Portal > Monitor > Traces**: each model call, skill and gate with timings.
 - **ODC Studio > Data tab** in the agent app: `DecisionLog` (every
   authorisation, gate and decision row), `ReviewCase` (who decided, when, the
   note) and `Customer` (the phone number after an approval).
+
+## Known issues (7 November 2026 run)
+
+- **One Enter press can send twice** if you send while the chat is still
+  loading a customer's history. Wait a few seconds after choosing the
+  customer. A fix is written as `mentor-prompts/71-single-send-guard.txt`.
+- **A multi-request message for a customer with an open complaint** (a
+  change plus a question, approved by staff) can end with the safe fallback
+  line instead of the answer to the question. DecisionLog shows the
+  confirmation rewrite failing its "no-question" check twice.
+- **Harmful content is refused but logged as a prompt attack**, and the
+  refusal renames the case it lands in to "Customer request".
 
 ## Notes
 

@@ -1,0 +1,9 @@
+Send in Branch Concierge Chatbot App V2. Chat screen scrolling. Read the logic first. Do not publish. Do not change public service action signatures, the workflow or how often the chat polls. Keep zero errors and warnings. List what you changed after each item.
+
+Problem: when the reader scrolls up the conversation, it jumps back to the bottom every few seconds, even when nothing new has arrived.
+
+1) Only scroll to the bottom when the number of messages shown has gone up, when the reader sends a message, or when a different case or customer is opened. Do not scroll on a poll that brings nothing new. If a new message arrives while the reader has scrolled up, do not move them: show the button in item 2 instead.
+
+2) Add a small round button with a down arrow at the bottom right of the message area, above the Ask me anything box. Show it only when the reader is not at the bottom. Clicking it scrolls to the latest message, and it hides again once the reader is at the bottom. Treat being within 40 pixels of the end as at the bottom. Give it an accessible label: "Scroll to latest message".
+
+Keep the waiting indicator and the chat box behaving as they do now. Report what was causing the jump.
