@@ -1,0 +1,20 @@
+Send in Branch Concierge Chatbot App V2 after revision 3 (prompt 72).
+
+Problem. A message sent before a new customer's history has loaded goes out with the previous customer's session. Retest on 7 Nov, 18:16 to 18:17, customer id typed and Enter pressed straight away each time:
+- C1002 was sent with ExistingSessionId 5784ac64... (C1004's latest session),
+- C1003 with d7a53ae1... (C1002's),
+- C1001 with 0e257e74... (C1003's).
+The workflow bound the right customer, so cases, replies and routing were right, but the audit log rows for C1001 carry C1003's session, and the agent's memory is kept per session.
+
+First tell me what you see: where Conversation.GUID is set and cleared on the Chat screen (OnCustomerChanged, the history load, OnSendMessage, polling), and whether a history load started for one customer can finish after the customer has changed and still set Conversation.GUID.
+
+Then fix it in this app only, as small as possible:
+1) OnCustomerChanged: clear Conversation.GUID (and anything else that holds the previous customer's case) as the first step, before the history load starts.
+2) History load: when it finishes, apply its result (messages and Conversation.GUID) only if the customer id on screen is still the one it was loaded for; otherwise ignore it.
+3) Generate_SessionId: when ExistingSessionId is not empty, reuse it only if this app's records show that session belongs to the same CustomerId (for example a CustomerCase or ChatMessage with that SessionId and CustomerId). If it belongs to another customer, or to no record of this customer, start a new session instead, as for a first message. Keep how a follow-up reuses the open case's session for the same customer.
+
+If the check in 3 needs anything from the agent app, stop and tell me what, before changing anything. Nothing else changes. Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep the prompt 71 guard as it is. Keep zero errors and warnings. List what you changed.
+
+Follow-up, sent in the same Mentor session after its answer:
+
+Yes, add that step: at the start of OnSendMessage, after the prompt 71 duplicate-send guard, if the customer id on screen differs from the customer the chat last loaded, run OnCustomerChanged first and wait for it to finish, then continue the send for the new customer. Make sure the delayed OnCustomerChanged from the customer field then sees nothing has changed and does not clear and reload a second time. Keep everything else as it is, keep zero errors and warnings, list what you changed, then publish.

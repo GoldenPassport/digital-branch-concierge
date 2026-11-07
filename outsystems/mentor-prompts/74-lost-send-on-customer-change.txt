@@ -1,0 +1,22 @@
+Send in Branch Concierge Chatbot App V2 after revision 4 (prompt 73 and its follow-up).
+
+Problem. Since revision 4 a message can be lost. When the customer id is changed and a message sent while the previous customer's reply is still pending (about four seconds after the previous send), the message box clears and nothing is sent: no Generate_SessionId call, no workflow instance, and the message does not appear in the chat. Seen twice on 7 Nov:
+- 19:49, C1004 sent "What time do you open on Tuesday?", then about four seconds later C1002 "What time do you close on Wednesday?" was lost.
+- 19:51, C1004 sent "Do you open on Fridays?", then about four seconds later C1003 "Is there parking at the branch?" was lost.
+The same sends with a pause of ten seconds or more went through. Revision 2 sent messages four to five seconds apart across customer changes without losing any, so the step added in revision 4 (OnSendMessage runs OnCustomerChanged first when the customer on screen has changed) is the likely cause.
+
+First tell me what you see: every path in OnSendMessage, OnCustomerChanged and anything they call (including the waiting-for-reply state, the prompt 71 guard and its "Remember this send" step, and anything that clears the message box or the message list) that can end a send without calling Generate_SessionId, and which of them fits this case.
+
+Then fix it in this app only, as small as possible, so that a send after a customer change always goes through for the new customer: the message is shown in the new customer's chat, Generate_SessionId is called once with the session check from prompt 73, and the previous customer's pending reply does not block it or appear in the new customer's chat. If the send cannot go through, keep the text in the message box instead of clearing it.
+
+Keep the prompt 71 guard and the prompt 73 session check as they are. Nothing else changes. Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep zero errors and warnings. List what you changed.
+
+Follow-up, sent in the same Mentor session after its first answer (it could not find the cause and suspected an error path):
+
+I reproduced it on the live revision 4 with every request, console error and toast recorded. It is not the error path.
+
+Sequence: C1004 sent "What time do you close on Mondays?" (history load, then Generate_SessionId, both 200). Four seconds later, with C1004's reply still pending, I typed C1003, Tab, typed "Can I pay in a cheque at the counter?" and pressed Enter. After Enter the browser made ActionGetChatHistoryLogic, ActionGetCurrentCaseDetail and ActionListChatCases (all 200), which is OnCustomerChanged run by the new step in OnSendMessage. Then nothing: no ActionGenerate_SessionId, no console error, no toast, the box was empty and the message was not in the chat. The first send of the same run (C1004, nothing pending) went through the same OnCustomerChanged step and then called Generate_SessionId normally.
+
+So the send ends after OnCustomerChanged returns, and only when the previous customer's reply was pending. Look at what OnSendMessage does after that call: the waiting-for-reply state, the polling epoch that OnCustomerChanged moves on, any variable OnCustomerChanged clears that the rest of OnSendMessage reads (the message text, the appended message, the message list), and any If that ends the action. Tell me which one ends it, then fix it so the send continues for the new customer: the message shows in C1003's chat and Generate_SessionId is called once. Keep your earlier changes from this prompt, the prompt 71 guard and the prompt 73 session check. Do not publish. Keep zero errors and warnings. List what you changed.
+
+Outcome: Mentor found no step that ends the send and made no further changes. A recorded repeat showed the cause was in the test, not the app: the message box is disabled while a reply is pending and until the new customer's history has loaded, and the automation typed into it while disabled. Prompt 74's changes were not published.

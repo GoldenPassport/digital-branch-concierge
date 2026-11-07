@@ -183,12 +183,11 @@ Where to look afterwards:
 
 ## Known issues (7 November 2026 run)
 
-- **Send after the history has loaded.** If you send while the chat is
-  still loading a new customer's history, the message goes out with the
-  previous customer's session id. Cases, replies and routing still follow the
-  right customer, but the audit log and agent memory share that session.
-  Wait a few seconds after choosing the customer. (The double send this
-  used to cause was fixed by prompt 71 in revision 2.)
+- **Fixed after the run** (Chatbot App V2 revisions 2 to 4, prompts 71 to
+  73): one Enter press could send twice, and a message sent before a new
+  customer's history had loaded went out with the previous customer's
+  session. While a reply is pending the message box is greyed out, also for
+  a moment after you change customer, until that customer's history loads.
 - **A multi-request message for a customer with an open complaint** (a
   change plus a question, approved by staff) can end with the safe fallback
   line instead of the answer to the question. DecisionLog shows the
