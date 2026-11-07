@@ -183,9 +183,12 @@ Where to look afterwards:
 
 ## Known issues (7 November 2026 run)
 
-- **One Enter press can send twice** if you send while the chat is still
-  loading a customer's history. Wait a few seconds after choosing the
-  customer. A fix is written as `mentor-prompts/71-single-send-guard.txt`.
+- **Send after the history has loaded.** If you send while the chat is
+  still loading a new customer's history, the message goes out with the
+  previous customer's session id. Cases, replies and routing still follow the
+  right customer, but the audit log and agent memory share that session.
+  Wait a few seconds after choosing the customer. (The double send this
+  used to cause was fixed by prompt 71 in revision 2.)
 - **A multi-request message for a customer with an open complaint** (a
   change plus a question, approved by staff) can end with the safe fallback
   line instead of the answer to the question. DecisionLog shows the

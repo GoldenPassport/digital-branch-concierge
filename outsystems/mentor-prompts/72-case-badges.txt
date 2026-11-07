@@ -1,0 +1,9 @@
+Send in Branch Concierge Chatbot App V2 after revision 2 (prompt 71).
+
+Two display changes to the case status badges. Change nothing else.
+
+1) Order. Wherever a case shows both badges (the Your cases panel on the Chat screen, the case header above the conversation, and anywhere else the same pair appears), show the "With customer" / "With us" badge first and the Open / Closed badge to its right. Today Open comes first.
+
+2) Labels. Rename the badge text "With customer" to "Customer" and "With us" to "Us". Change only the displayed text, not the stored values, the conditions that choose the badge or its colours.
+
+First tell me every place these badges appear. Do not publish. Do not change the workflow, the agent app or how the chat polls. Keep zero errors and warnings. List what you changed.
