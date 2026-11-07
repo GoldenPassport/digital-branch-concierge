@@ -16,8 +16,10 @@ You do not need to rebuild anything: import the files below.
 
 The V2 files were reinstalled from scratch and retested end to end on
 7 November 2026, following the steps below: all twelve test conversations
-passed, plus the staff decisions, learnings and timeout checks. Results and
-findings: `evaluations/clean-run-2026-11-07.md`.
+passed, plus the staff decisions, learnings and timeout checks. After the
+chat fixes (Chatbot App V2 revision 4, the file here) the twelve and the
+staff decisions were run again and passed. Results and findings:
+`evaluations/clean-run-2026-11-07.md`.
 
 ## What is in here
 
