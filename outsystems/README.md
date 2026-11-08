@@ -25,13 +25,13 @@ staff decisions were run again and passed. Results and findings:
 
 | File | What it is |
 | --- | --- |
-| `apps/Branch Concierge Agent V2.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the impact and policy gate, the audit log, review cases, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
+| `apps/Branch Concierge Agent V2.oml` | The agent app: the agent (Agent Workbench), four skills and three read-only tools as server actions, Authorise, the audit log, the DecisionOwner role and the public actions and events the workflow and the chatbot app use. Seeds the demo data on publish. |
 | `apps/Branch Concierge Chatbot App V2.oml` | The customer chat, which starts a workflow per case, passes follow-up messages into it and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
 | `workflow/Branch Concierge Workflow V2.oml` | The workflow that runs each case: agent, gate, decision owner, reply, and the wait for the customer's answer. |
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
 | `evaluations/concierge-12-agent.json` | The same twelve judged at the agent layer for the final build: reply and tools only, since the route is set by the workflow's gate. |
 | `evaluations/clean-run-2026-11-07.md` | Results of the clean end-to-end run on a fresh install, checked against the data tables, with findings. |
-| `mentor-prompts/01` to `71` | The requests that built and refined the two apps, in order. See `mentor-prompts/README.md`. |
+| `mentor-prompts/01` to `75` | The requests that built and refined the two apps, in order. See `mentor-prompts/README.md`. |
 
 Shared data, in `../shared`, is also used by the n8n and LangGraph builds:
 four demo customers (one with an open complaint, one with a vulnerability
@@ -43,8 +43,8 @@ nothing to load by hand.
 
 | In ODC | What it is |
 | --- | --- |
-| Branch Concierge Agent V2 | The agent app: agent, skills, tools, gate, audit log, review cases |
-| Branch Concierge Chatbot App V2 | The customer chat and the Review cases screen (`/BranchConciergeChatbotAppV2/Chat`, `/BranchConciergeChatbotAppV2/ReviewCases`) |
+| Branch Concierge Agent V2 | The agent app: agent, skills, tools, audit log |
+| Branch Concierge Chatbot App V2 | The customer chat, the impact and policy gate, the review cases and the Review cases screen (`/BranchConciergeChatbotAppV2/Chat`, `/BranchConciergeChatbotAppV2/ReviewCases`) |
 | Branch Concierge Workflow V2 | The workflow that runs each request |
 
 The apps were renamed from Branch Concierge Demo and Branch Concierge Demo
@@ -95,8 +95,10 @@ PrepareCustomerWait ─> CustomerToAnswer (did the agent ask the customer someth
 - The decision owner's decision is final. The agent is called again only to
   word the outcome for the customer, and the gate checks that wording too.
 - A guardrail refusal goes straight to the customer with route `refused`.
-- `CallBranchConcierge`, the service action ODC generated with the agent
-  app, runs the same agent and gate in one call. The evaluations use it.
+- `CallBranchConciergeDemo`, the service action ODC generated with the agent
+  app, runs the agent's turn only. The gate runs in the workflow
+  (`RunImpactPolicyGate` in the chatbot app), so the evaluation judges the
+  agent layer and routing is checked in end-to-end runs.
 
 ## Import it
 
@@ -136,7 +138,8 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    `apps/Branch Concierge Agent V2.oml`. In Automations > Agents > CallAgent,
    check the AI model is `deepseek_flash`, shown as
    `Calldeepseek_flash` (or choose yours), then
-   1-Click Publish. Publishing seeds the demo data.
+   1-Click Publish. Publishing seeds the demo data, and every later publish of
+   this app resets the demo customers to their seed values.
 5. **Import the chatbot app.** Open `apps/Branch Concierge Chatbot App V2.oml`
    the same way. If Studio reports outdated references, use Manage
    dependencies to refresh Branch Concierge Agent, then 1-Click Publish.
