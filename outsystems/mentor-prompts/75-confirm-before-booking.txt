@@ -1,0 +1,12 @@
+Send in Branch Concierge Agent V2 (revision 1).
+
+Problem. In the 8 Nov evaluation (concierge-12 V2, test T04) the customer asked "Can you book me in with a mortgage adviser tomorrow afternoon?" and the agent called FindSlots, OpeningHours and BookAppointment in one turn and booked 14:00, instead of offering the slots and asking which one. In the chat on 7 Nov the same request was answered with an offer and a question. Booking is low risk and not gated, so the confirm-first behaviour depends on the agent alone.
+
+First tell me what you see: the description of the BookAppointment action the agent calls (book_appointment), the description of FindSlots, and any line in the agent's instructions about booking or confirming slots.
+
+Then, in this app only, make the agent book only after the customer has chosen:
+1) BookAppointment description: add that it must only be called after the customer has picked one of the slots offered in this conversation, or named an exact slot and confirmed it; never in the same turn as FindSlots for a new request.
+2) FindSlots description: add that after finding slots the agent offers them and asks the customer to choose, without booking.
+3) If the agent's instructions mention booking, add one sentence with the same rule. If they do not, change nothing there.
+
+Change nothing else: not the skills' logic, Authorise, the Capability registry, risk ratings, other actions or the service actions. Do not publish. Keep zero errors and warnings. List what you changed.
