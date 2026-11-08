@@ -46,4 +46,4 @@ against one Enter press sending twice), 72 (case badge order and labels) and
 73 (a session per customer) were sent through the OutSystems MCP connection
 on 7 November 2026 and published as Chatbot App V2 revisions 2, 3 and 4. 74
 was a lost-send report that turned out to be the test typing into a disabled
-box; its changes were discarded. See `../evaluations/clean-run-2026-11-07.md`.
+box; its changes were discarded. 75 (Agent V2: offer slots and book only after the customer has chosen) was published as Agent V2 revision 2 on 8 November. See `../evaluations/clean-run-2026-11-07.md`.

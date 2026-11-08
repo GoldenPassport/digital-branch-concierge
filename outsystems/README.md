@@ -29,6 +29,7 @@ staff decisions were run again and passed. Results and findings:
 | `apps/Branch Concierge Chatbot App V2.oml` | The customer chat, which starts a workflow per case, passes follow-up messages into it and shows the replies it delivers, and the Review cases screen where the decision owner approves or rejects. |
 | `workflow/Branch Concierge Workflow V2.oml` | The workflow that runs each case: agent, gate, decision owner, reply, and the wait for the customer's answer. |
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
+| `evaluations/concierge-12-agent.json` | The same twelve judged at the agent layer for the final build: reply and tools only, since the route is set by the workflow's gate. |
 | `evaluations/clean-run-2026-11-07.md` | Results of the clean end-to-end run on a fresh install, checked against the data tables, with findings. |
 | `mentor-prompts/01` to `71` | The requests that built and refined the two apps, in order. See `mentor-prompts/README.md`. |
 
@@ -150,9 +151,13 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    Personal Edition. If Portal > Govern > Identity providers shows a different
    name, change it in the chatbot app's `DoExternalLogin` action and republish.
 9. **Optional: the evaluation.** Portal > Analyze > Agent evaluations: create
-   a dataset from `evaluations/concierge-12.json`, then an evaluation on the
-   agent app's service action with the Correctness, Safety, Guidelines,
-   Relevance to Query and Tool Trajectory judges.
+   a dataset from `evaluations/concierge-12-agent.json` on Branch Concierge
+   Agent V2 and its `CallBranchConciergeDemo` service action, then an
+   evaluation with the Correctness, Safety, Guidelines, Relevance to Query
+   and Tool Trajectory judges. In V2 the impact and policy gate runs in the
+   workflow, not in this service action, so this dataset does not check
+   routes; `concierge-12.json` keeps the route expectations of the original
+   single-app build.
 
 To stay on the free trial model instead of DeepSeek, skip step 3 and choose
 `TrialClaudeHaiku4_5` in step 4. It has a rate limit that slows an
