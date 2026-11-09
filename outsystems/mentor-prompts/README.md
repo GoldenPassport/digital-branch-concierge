@@ -38,7 +38,7 @@ Prompts 10 to 12 complete it:
 
 The workflow itself is built in the Portal's workflow editor, not by Mentor.
 
-Prompts 13 to 71 came after: 13 to 56 the case model, the review screens
+Prompts 13 to 76 came after: 13 to 56 the case model, the review screens
 and the refactor to a skinny agent (Agent V2 and Chatbot App V2, see
 `../refactor-skinny-agent-plan.md`), 57 to 70 chat display, staff decision
 and approval confirmation fixes found in the November retests. 71 (a guard
@@ -46,4 +46,4 @@ against one Enter press sending twice), 72 (case badge order and labels) and
 73 (a session per customer) were sent through the OutSystems MCP connection
 on 7 November 2026 and published as Chatbot App V2 revisions 2, 3 and 4. 74
 was a lost-send report that turned out to be the test typing into a disabled
-box; its changes were discarded. 75 (Agent V2: offer slots and book only after the customer has chosen) was published as Agent V2 revision 2 on 8 November. See `../evaluations/clean-run-2026-11-07.md`.
+box; its changes were discarded. 75 (Agent V2: offer slots and book only after the customer has chosen) was published as Agent V2 revision 2 on 8 November. 76 (Agent V2: reuse a pending contact change instead of creating a duplicate) was published as revision 2 of the 9 November install. See `../evaluations/clean-run-2026-11-07.md`.

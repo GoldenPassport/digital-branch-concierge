@@ -1,0 +1,12 @@
+Send in Branch Concierge Agent V2 (revision 1 of the 9 November install, which is the export of revision 2).
+
+Problem. In the 9 November run (test T06) the customer asked once to change their phone number and the agent called UpdateContactDetails twice in one turn (trace 4818d9bf, 10:46:28 UTC: two CreateContactChangeRequest calls). Two ContactChangeRequest rows were created for C1003, same field and value: CCR-EHAJ and CCR-GHAJ. The approval applied CCR-GHAJ and CCR-EHAJ is still pending, with nothing that will ever resolve it.
+
+First tell me what you see: the flow of UpdateContactDetails after Authorise, how the Reference is generated, what it returns to the agent, and every status a ContactChangeRequest can move to and where (pending, applied, cancelled and any other).
+
+Then, in this app only, make the skill safe to call twice:
+1) In UpdateContactDetails, after Authorise and before CreateContactChangeRequest, look for a ContactChangeRequest with the same CustomerId, Field and NewValue and Status "pending".
+2) If one exists, do not create another. Return the same result the skill returns for a new request, using the existing row's Reference, so the agent's reply is unchanged.
+3) If none exists, carry on exactly as today.
+
+Change nothing else: not Authorise or its DecisionLog row, the Capability registry, risk ratings, other skills, the agent's instructions or tool descriptions, or the service actions. Keep zero errors and warnings. List what you changed, then publish.

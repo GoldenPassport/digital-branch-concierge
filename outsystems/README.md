@@ -31,7 +31,7 @@ staff decisions were run again and passed. Results and findings:
 | `evaluations/concierge-12.json` | The twelve test conversations as an Agent evaluations dataset, with expected replies, routes, reasons, guidelines and tools. |
 | `evaluations/concierge-12-agent.json` | The same twelve judged at the agent layer for the final build: reply and tools only, since the route is set by the workflow's gate. |
 | `evaluations/clean-run-2026-11-07.md` | Results of the clean end-to-end run on a fresh install, checked against the data tables, with findings. |
-| `mentor-prompts/01` to `75` | The requests that built and refined the two apps, in order. See `mentor-prompts/README.md`. |
+| `mentor-prompts/01` to `76` | The requests that built and refined the two apps, in order. See `mentor-prompts/README.md`. |
 
 Shared data, in `../shared`, is also used by the n8n and LangGraph builds:
 four demo customers (one with an open complaint, one with a vulnerability
@@ -202,9 +202,10 @@ Where to look afterwards:
   reinstall): the app log shows "a user is already authenticated via a
   different mechanism" (OS-CLRT-40102), so the browser is holding an old
   session for this app. Sign out or clear that site's data, then sign in.
-- **Duplicate change requests** (9 November run): the agent can call
-  `UpdateContactDetails` twice in one turn; the second request stays pending
-  after the first is applied.
+- **Duplicate change requests** (9 November run, fixed by prompt 76): the agent
+  could call `UpdateContactDetails` twice in one turn and leave a request
+  pending. The skill now reuses a pending request for the same customer, field
+  and value. The check is not atomic.
 - **A multi-request message for a customer with an open complaint** (a
   change plus a question, approved by staff) can end with the safe fallback
   line instead of the answer to the question. DecisionLog shows the
