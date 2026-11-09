@@ -148,7 +148,7 @@ You need a free ODC Personal Edition, ODC Studio and a DeepSeek API key.
    first: the workflow starts on their `CustomerRequestReceived` event.
 7. **Make yourself the decision owner.** Portal > Govern > Users > your user
    > End-user access > Manage roles: Branch Concierge Agent V2, Development stage,
-   DecisionOwner.
+   DecisionOwner. Both the chat and Review cases need this role.
 8. **Check the sign-in provider.** The Review cases screen signs staff in
    through the stage's identity provider, named `OutSystems Community` in the
    Personal Edition. If Portal > Govern > Identity providers shows a different
@@ -198,6 +198,13 @@ Where to look afterwards:
   customer's history had loaded went out with the previous customer's
   session. While a reply is pending the message box is greyed out, also for
   a moment after you change customer, until that customer's history loads.
+- **Login page says no external identity provider is configured** (after a
+  reinstall): the app log shows "a user is already authenticated via a
+  different mechanism" (OS-CLRT-40102), so the browser is holding an old
+  session for this app. Sign out or clear that site's data, then sign in.
+- **Duplicate change requests** (9 November run): the agent can call
+  `UpdateContactDetails` twice in one turn; the second request stays pending
+  after the first is applied.
 - **A multi-request message for a customer with an open complaint** (a
   change plus a question, approved by staff) can end with the safe fallback
   line instead of the answer to the question. DecisionLog shows the
